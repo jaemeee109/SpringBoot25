@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"><!-- * 필수 * thymeleaf용 프론트로 연동됨-->
+<head>
+    <meta charset="UTF-8">
+    <title>SampleController 에서 넘어온 Model 처리 방법</title>
+</head>
+<body>
+  <hr><br>
+  <div th:text="${list}">리스트로 넘어온 데이터 확인용</div>
+  <hr><br>
+  <div th:text="${map}">맵(k,v)으로 넘어온 데이터 확인용</div>
+  <hr><br>
+  <div th:text="${dto}">sampleDTO로 넘어온 데이터 확인용</div>
+  <hr><br>
+
+    <script th:inline="javascript"> <!--타입리프에 자바 스크립트 선언 방법 -->
+        const list = [[${list}]] // 모델에서 넘어온 객체를 list 변수에 넣음
+        const map = [[${map}]]
+        const dto = [[${dto}]]
+
+    // 크롬 콘솔에 출력 해보기
+    console.log(list)
+    console.log(map)
+    console.log(dto)
+    </script>
+</body>
+</html>
