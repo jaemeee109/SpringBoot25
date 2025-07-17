@@ -16,36 +16,35 @@ import java.util.stream.IntStream;
 @Controller
 @Log4j2
 public class SampleController {
-    // 컨트롤러는 url 생성과 프론트를 연결하는 부분으로 과거에 servlet-context.xml과 같은 역할을 함
+    // 컨트롤러는 URL 생성과 프론트를 연결하는 부분으로 과거에 servlet-context.xml과 같은 역할을 함
 
-    @GetMapping("/hello")  //  http://192.168.111.105:80/hello -> void -> hello.html
+    @GetMapping("/hello") // http://192.168.111.105:80/hello -> void -> hello.html
     public void hello(Model model){
 
-        log.info("SampleController.hello메서드 실행.....");
-
-        model.addAttribute("msg", "안녕하세요 자바에 종점입니다.!!!!");
+        log.info("===SampleController.hello 메서드 실행===");
+        model.addAttribute("msg","안녕하세요 자바의 종점입니다 !");
 
     }
-
-    @GetMapping("/ex/ex1") // http://192.168.111.105/ex/ex1 -> /resources/templates/ex/ex1.html
+    @GetMapping("/ex/ex1") // http://192.168.111.105:80/ex/ex1 -> /resources/templates/ex/ex1.html
     public void ex1(Model model){
-        // 리스트타입으로 데이터를 보내 보자.
-        List<String> list = Arrays.asList("김기원", "이현우","홍경훈","박채은","양지민");
+        // 리스트 타입으로 데이터를 보내보자
+        List<String> list = Arrays.asList("김춘식","신짱구","신짱아","홍길동","김철수");
 
-        model.addAttribute("list",list);
+        model.addAttribute("list",list);  // ("변수","값")
 
     }
-
+    /* 클래스 안에 클래스 만들기  */
     @ToString
     class SampleDTO{
-        // 이너 클래스로 클래스 안쪽에 클래스를 선언할 때 활용 된다.
+        // 이너 클래스 : 클래스 안쪽에 클래스를 선언할때 활용
+        
         // 필드
-        private String p1, p2, p3;
-
-        // 기본생성자
-
-
+        private String p1,p2,p3;
+        
+        // 기본 생성자
+        
         // 메서드
+        /* CODE -> Generate 에서 자동생성 */
         public String getP1() {
             return p1;
         }
@@ -57,40 +56,43 @@ public class SampleController {
         public String getP3() {
             return p3;
         }
-    } // 이너 클래스 종료
 
+    } // 이너클래스 SampleDTO종료
+    
     @GetMapping("/ex/ex2")
     public void ex2(Model model){
-        log.info("SampleController.ex2 메서드 실행....");
-        // 이너 클래스를 사용해서 객체를 뿌려보자.
+        log.info("=== SampleController.ex2 메서드 실행 ===");
+        // 이너클래스를 사용해서 객체를 뿌려보자 (p.426)
 
-        List<String> strList = IntStream.range(1,10) // 1~10까지 정수를 생성한다.
-                .mapToObj(i -> "데이터"+i)
-                .collect(Collectors.toList());  // 리스트에 정수(숫자)문자열이 생성된다.
-        // [데이터1, 데이터2 ...... 데이터9]
+        List<String> strList = IntStream.range(1,10) // 1부터 10까지 정수 생성
+                .mapToObj(i->"데이터"+i)
+                .collect(Collectors.toList()); // 리스트에 정수(숫자) 문자열이 생성됨
+        // [데이터1, ~데이터9 ]
 
-        Map<String,String> map = new HashMap<>();
-        map.put("id","kkw");
-        map.put("pw","1234"); // key , value
+        Map<String, String> map = new HashMap<>();
+        map.put("id","kcs");
+        map.put("pw","1234");
 
-        SampleDTO sampleDTO =new SampleDTO();
-        sampleDTO.p1 = "값....  p1";
-        sampleDTO.p2 = "값....  p2";
-        sampleDTO.p3 = "값....  p3";
-        // 최종적으로 객체 3개 완성 됨. 
-        
-        model.addAttribute("list",strList); // 65행에 만들어진 객체 값
-        model.addAttribute("map",map);      // 70행에 만들어진 객체 값
+        SampleDTO sampleDTO = new SampleDTO();
+        sampleDTO.p1 = "값..p1";
+        sampleDTO.p2 = "값..p2";
+        sampleDTO.p3 = "값..p3";
+        // 최종적으로 객체 3개 완성 됨
+
+        model.addAttribute("list",strList); // 65행에서 만들어진 객체 값
+        model.addAttribute("map",map); // 70행에서 만들어진 객체 값
         model.addAttribute("dto",sampleDTO); // 74행에 만들어진 객체 값
+        
+        // 리턴 타입이 void 임으로 /resources/templates/ex/ex1.html 을 찾는다
 
-        // 리턴타입이 void 임으로  /resources/templates/ex/ex2.html
-    }
-
-    @GetMapping("/ex/ex3") //http://192.168.111.105/ex/ex3 -> /resources/templates/ex/ex3.html
+    } // ex2종료
+    
+    @GetMapping("/ex/ex3") // http://192.168.111.105:80/ex/ex3-> /resources/templates/ex/ex3.html
     public void ex3(Model model){
-        log.info("SampleController.ex3 메서드 실행....");
+        log.info("=== SampleController.ex3 메서드 실행 ===");
+        model.addAttribute("arr",new String[]{"신형만,봉미선,신짱구,신짱아,흰둥이"});
 
-        model.addAttribute("arr", new String[]{"전민기, 김진우, 전혜진"});
-
-    }
-}
+    }// ex3 종료
+    
+    
+}//class 종료
