@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<div layout:fragment="content">
+   <!--<h1> 게시판 리스트 페이지 </h1>-->
+   <div class="row mt-3">
+      <!--검색용 form 처리 -->
+      <form action="/board/list" method="get">
+      <div class="col">
+            <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+            <div class="input-group">
+               <div class="input-group-prepend">
+                  <select class="form-select" name="type">
+                     <option value="">검색시클릭</option>
+                     <option value="t" th:selected="${pageRequestDTO.type=='t'}">제목</option>
+                     <option value="c" th:selected="${pageRequestDTO.type=='c'}">내용</option>
+                     <option value="w" th:selected="${pageRequestDTO.type=='w'}">작성자</option>
+                     <option value="tc" th:selected="${pageRequestDTO.type=='tc'}">제목,내용</option>
+                     <option value="tw" th:selected="${pageRequestDTO.type=='tw'}">제목,작성자</option>
+                     <option value="tcw" th:selected="${pageRequestDTO.type=='tcw'}">제목,내용,작성자</option>
+                  </select>
+               </div> <!-- 검색 리스트 박스 종료 -->
+
+               <input type="text" class="form-control" name="keyword" th:value="${pageRequestDTO.keyword}">
+               <div class="input-group-append">
+                  <button class="btn btn-outline-secondary searchBtn" type="submit">검색</button>
+                  <button class="btn btn-outline-secondary clearBtn" type="button">Clear</button>
+               </div>
+            </div>
+
+         <div class="card">
+            <div class="card-header">
+               게시판 리스트 페이지
+            </div>
+            <div class="card-body">
+               <h5 class="card-title">Board List</h5>
+               <!--테이블 영역-->
+               <table class="table">
+                  <thead>
+                     <tr>
+                        <th scope="col">bno</th>
+                        <th scope="col">제목</th>
+                        <th scope="col">작성자</th>
+                        <th scope="col">등록일</th>
+                     </tr>
+                  </thead> <!--테이블 제목 끝-->
+           <!--p.500-->
+                  <tbody th:with="link=${pageRequestDTO.getLink()}">
+                  <tr th:each="dto:${responseDTO.dtoList}">
+                     <th scope="row">[[${dto.bno}]]</th>
+                     <td>
+                        <a th:href="|@{/board/read(bno =${dto.bno})}&${link}|">[[${dto.title}]] </a>
+                     </td>
+                     <td>[[${dto.writer}]]</td>
+                     <td>[[${#temporals.format(dto.regDate,'yyyy-MM-dd')}]]</td>
+                  </tr>
+                  </tbody> <!--표 본문영역-->
+
+               </table>
+               <!-- 페이징 처리용 아이콘 -->
+               <div class="float-end">
+                  <ul class="pagination flex-wrap">
+                     <li class="page-item" th:if="${responseDTO.prev}">
+                        <a class="page-link" th:data-num="${responseDTO.start -1}">이전페이지</a>
+                     </li>
+                     <th:block th:each="i:${#numbers.sequence(responseDTO.start,responseDTO.end)}">
+                        <!-- 페이징처리에 필요한 숫자 배열이 생성  i값에 넣고 for문 진행-->
+                        <li th:class="${responseDTO.page == i}?'page-item active':'page-item'">
+                           <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+                        </li> <!--  [1] [2] [3] ......  -->
+                     </th:block>
+                     <li class="page-item" th:if="${responseDTO.next}">
+                        <a class="page-link" th:data-num="${responseDTO.end + 1}">다음페이지</a>
+                     </li>
+
+                  </ul>
+
+               </div>
+
+            </div>
+         </div>
+      </div>
+      </form> <!--form 종료-->
+   </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+
+   /*console.log("자바스크립트 fragment 테스트..........")*/
+   /*예전에는 자바 스크립트를 짧게 줄여 쓰려고 jQuery등을 사용했는데 최근에는 원시적으로 돌아가려한다.*/
+   /*addEventListener (동작,기능,(버블링 false, 캡쳐링 true))*/
+   document.querySelector(".pagination").addEventListener("click",function (e){
+      e.preventDefault() // 원래 기능을 무시해라. (원시코드라고 생각해..고유 동작을 중단)
+      e.stopPropagation() // 상위 엘리먼트들로 이벤트 전파 중단. (버블링)
+
+      const target = e.target // 이벤트에 타겟을 변수로 넣는다
+
+      if(target.tagName !== 'A'){
+         return // A태그가 아니면 돌아가라
+      }//if종료
+      const num = target.getAttribute("data-num")
+      /*<a class="page-link" th:data-num="${i}">[[${i}]]></a> */
+
+      const formObj = document.querySelector("form") // <form action="/board/list" method="get">
+      formObj.innerText += `<input type='hidden' name='page' value='${num}'>` // 백틱(`)
+
+      formObj.submit() // 저장적용
+
+   },false) //버블링
+   //하단에 페이징 번호를 클릭시 적용되는 기능 구현 종료
+
+   // clearBtn 클릭시 기능
+   document.querySelector(".clearBtn").addEventListener("click",function (e){
+      e.preventDefault()//원래기능무시
+      e.stopPropagation()//버블링 금지
+      self.location='/board/list' // 초기화 버튼을 누르면 옵션없이 초기 리스트 보임
+   },false)
+
+   // show modal
+   const result = [[${result}]]
+   if(result){
+      alert(result)
+   }
+
+  console.log("자바스크립트 fragment 테스트.....")
+</script>
