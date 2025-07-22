@@ -59,7 +59,7 @@ public class PageRequestDTO {
                     log.info("UTF-8 처리중 오류발생");
                 } // try문 종료
             } // 키워드 if문 종료
-            link = builder.toString(); // 최종 결과물이 문자열로 변환되어 link에 저장
+            link = builder().toString(); // 최종 결과물이 문자열로 변환되어 link에 저장
         } // if 문 종료
         return link; // page=1&size=10&type=???&keyword=????
 

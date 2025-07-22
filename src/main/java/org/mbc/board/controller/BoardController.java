@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.mbc.board.dto.BoardDTO;
+import org.mbc.board.dto.BoardListReplyCountDTO;
 import org.mbc.board.dto.PageRequestDTO;
 import org.mbc.board.dto.PageResponseDTO;
 import org.mbc.board.service.BoardService;
@@ -27,69 +28,111 @@ public class BoardController {
     public void list(PageRequestDTO pageRequestDTO, Model model){
         // 페이징 처리와 정렬과 검색이 추가된 리스트가 나옴.
 
-        PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
+        // p548쪽 제외PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
         // 페이징 처리가 되는 요청을 처리하고 결과를 response로 받는다.
+
+        PageResponseDTO<BoardListReplyCountDTO> responseDTO =
+                boardService.listWithReplyCount(pageRequestDTO);
+        // 댓글의 갯수용 dto로 프론트 전달!!
 
         log.info(responseDTO);
 
         model.addAttribute("responseDTO",responseDTO); // 결과를 스프링이 관리하는 모델 객체로 전달
-    } // list 종료
+    }
+
 
     @GetMapping("/register")
-    public void register(){
+    public void registerGET(){
 
     }
 
     @PostMapping("/register")
     public String registerPost(@Valid BoardDTO boardDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes){
+        // BindingResult : @Valid,  @ModelAttribute에 데이터 바인딩 오류가 발생할때 오류정보를 담는다.
+        // bindingResult가 없으면 400 오류가 발생하게 되고 Controller가 호출되지 않고 Error Page로 이동함.
 
-        log.info("======= board Post register =======");
-        if(bindingResult.hasErrors()){
-            log.info("=== has error ===");
-            redirectAttributes.addFlashAttribute("errors",bindingResult.getAllErrors());
+        log.info("board POST register.......");
+
+        if(bindingResult.hasErrors()) { // 오류발생시 addFlashAttribute로 1회용 에러 메시지를 담고 전달한다.
+            log.info("has errors.......");
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors() );
             return "redirect:/board/register";
-
-        } // if 종료
+        }
 
         log.info(boardDTO);
-        Long bno = boardService.register(boardDTO);
-        redirectAttributes.addFlashAttribute("result",bno);
+
+        Long bno  = boardService.register(boardDTO);
+
+        redirectAttributes.addFlashAttribute("result", bno);
+        // 정상 처리시 addFlashAttribute에 결과 정보를 bno를 담아 전달한다.
         return "redirect:/board/list";
-    } //registerPost 종료
+    }
 
-    @GetMapping({"/read","/modify"})
+
+//    @GetMapping("/read")
+//    public void read(Long bno, PageRequestDTO pageRequestDTO, Model model){
+//
+//        BoardDTO boardDTO = boardService.readOne(bno);
+//
+//        log.info(boardDTO);
+//
+//        model.addAttribute("dto", boardDTO);
+//
+//    }
+
+
+    @GetMapping({"/read", "/modify"})
     public void read(Long bno, PageRequestDTO pageRequestDTO, Model model){
-        BoardDTO boardDTO = boardService.readOne(bno);
-        log.info(boardDTO);
-        model.addAttribute("dto",boardDTO);
-        model.addAttribute("pageRequestDTO", pageRequestDTO);
-        return ;
-    }//read 종료
-    
-    @PostMapping("/modify")
-    public String modify(PageRequestDTO pageRequestDTO,@Valid BoardDTO boardDTO,BindingResult bindingResult,RedirectAttributes redirectAttributes){
-        
-        log.info("===board modify post===" + boardDTO);
-        if(bindingResult.hasErrors()){
-            log.info("===has error===");
-            
-            String link = pageRequestDTO.getLink();
-            redirectAttributes.addFlashAttribute("errors",bindingResult.getAllErrors());
-            redirectAttributes.addFlashAttribute("bno",boardDTO.getBno());
-            return "redirect:/board/modify?"+link;
-        } // if 종료
-         boardService.modify(boardDTO);
-        redirectAttributes.addFlashAttribute("result","modified");
-        redirectAttributes.addFlashAttribute("bno",boardDTO.getBno());
-        return "redirect:/board/read";
 
-    } //modify  종료
+        BoardDTO boardDTO = boardService.readOne(bno);
+
+        log.info(boardDTO);
+
+        model.addAttribute("dto", boardDTO);
+
+    }
+
+    @PostMapping("/modify")
+    public String modify( PageRequestDTO pageRequestDTO,
+                          @Valid BoardDTO boardDTO,
+                          BindingResult bindingResult,
+                          RedirectAttributes redirectAttributes){
+
+        log.info("board modify post......." + boardDTO);
+
+        if(bindingResult.hasErrors()) {
+            log.info("has errors.......");
+
+            String link = pageRequestDTO.getLink();
+
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors() );
+
+            redirectAttributes.addAttribute("bno", boardDTO.getBno());
+
+            return "redirect:/board/modify?"+link;
+        }
+
+        boardService.modify(boardDTO);
+
+        redirectAttributes.addFlashAttribute("result", "modified");
+
+        redirectAttributes.addAttribute("bno", boardDTO.getBno());
+
+        return "redirect:/board/read";
+    }
+
 
     @PostMapping("/remove")
-    public String remove(Long bno, RedirectAttributes redirectAttributes){
-        log.info("===remove post===" + bno);
+    public String remove(Long bno, RedirectAttributes redirectAttributes) {
+
+        log.info("remove post.. " + bno);
+
         boardService.remove(bno);
-        redirectAttributes.addFlashAttribute("result","remove");
+
+        redirectAttributes.addFlashAttribute("result", "removed");
+
         return "redirect:/board/list";
-    } // remove 종료
-}//class종료
+
+    }
+
+}
