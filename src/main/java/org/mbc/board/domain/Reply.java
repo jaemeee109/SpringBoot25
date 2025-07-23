@@ -8,7 +8,7 @@ import lombok.*;
 @Builder    // 세터 대신 빌더패턴 필수로 @AllArgsConstructor @NoArgsConstructor
 @AllArgsConstructor // 모든 필드를 생성자 파라미터로 처리
 @NoArgsConstructor  // 기본생성자용
-@ToString/*(exclude = "board")  */ // board 제외하고 toString 처리 (객체로 이미 되어 있음)
+@ToString(exclude = "board") // board 제외하고 toString 처리 (객체로 이미 되어 있음)
 @Table(name ="Reply", indexes = {@Index(name="idx_reply_board_bno", columnList = "board_bno")})
 // 테이블명을 Reply    빠른처리(검색)를 위한 인덱싱 처리 fk로 지정된 필드를 사용
 public class Reply extends BaseEntity { // extends BaseEntity 등록일, 수정일 처리용 객체
@@ -45,4 +45,11 @@ public class Reply extends BaseEntity { // extends BaseEntity 등록일, 수정�
     //       add constraint FKr1bmblqir7dalmh47ngwo7mcs
     //       foreign key (board_bno)
     //       references board (bno)
+
+
+    // 세터 대신 변경시 활용되는 메서드 (댓글 수정은 text만 가능)
+    public void changeText(String text){
+        this.replyText = text;
+    } //changeText 종료
+
 }

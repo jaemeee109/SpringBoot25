@@ -31,4 +31,6 @@ public class ReplyDTO {
     private String replyer ; // 댓글 작성자
 
     private LocalDateTime regDate, modDate; // 등록일, 수정일
+
+
 }

@@ -1,6 +1,8 @@
 package org.mbc.board.controller.advice;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice // 검증을 지원하는 컨트롤러
 @Log4j2
@@ -41,4 +44,40 @@ public class CustomRestAdvice {
         // 200외적으로 400 에러등을 처리하는 지원용 컨트롤러 임.
     }
 
-}
+    // 500 에러 등에 대한 처리 p.559
+
+    @ExceptionHandler({DataIntegrityViolationException.class}) // fk 예외사항 처리하는 핸들러
+    // DataIntegrityViolationException : sql문이 잘못 되었거나 data가 잘 못 들어온 경우
+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
+    public ResponseEntity<Map<String,String>> handelFKException(Exception e){
+        log.error(e);
+        Map<String,String > errorMap = new HashMap<>();
+        // 에러 메세지를 담는다
+
+        //              key                 value
+        errorMap.put("에러발생시간 : ",""+ System.currentTimeMillis());
+        errorMap.put("에러메세지 : ","sql이나 data가 잘못 들어왔습니다");
+        return ResponseEntity.badRequest().body(errorMap);
+    } // ResponseEntity<Map<String,String>> handelFKException 종료
+
+
+    // 댓글에 번호가 없을 때 처리되는 예외
+    @ExceptionHandler({NoSuchElementException.class, // 찾는 요소가 없을 때 발생
+            EmptyResultDataAccessException.class})  // 해당 데이터가 없을 경우 처리 (삭제시 객체가 없을때
+    // ServiceImpl의 Optional.orElseThrow() 에대한 처리
+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
+    public ResponseEntity<Map<String,String>> handelNoSuchElementException(Exception e){ // Exception e (공통처리용)
+       
+        log.error(e);
+        Map<String,String > errorMap = new HashMap<>();
+        // 에러 메세지를 담는다
+
+        //              key                 value
+        errorMap.put("에러발생시간 : ",""+ System.currentTimeMillis());
+        errorMap.put("에러메세지1 : ","찾는 rno가 없습니다");
+        errorMap.put("에러메세지2 : ","찾는 객체가 없습니다");
+        return ResponseEntity.badRequest().body(errorMap);
+        
+    } // ResponseEntity<Map<String,String>> handelNoSuchElementException 종료
+    
+} // class 종료
