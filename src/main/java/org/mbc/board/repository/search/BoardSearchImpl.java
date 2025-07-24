@@ -1,19 +1,21 @@
 package org.mbc.board.repository.search;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
-import org.mbc.board.domain.Board;
-import org.mbc.board.domain.QBoard;
-import org.mbc.board.domain.QReply;
-import org.mbc.board.domain.Reply;
+import org.mbc.board.domain.*;
+import org.mbc.board.dto.BoardImageDTO;
+import org.mbc.board.dto.BoardListAllDTO;
 import org.mbc.board.dto.BoardListReplyCountDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardSearch {
 
@@ -240,6 +242,95 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         //        )
         //        and b1_0.bno>?
         
+    }
+
+    @Override
+    public Page<BoardListAllDTO> searchWithAll(String[] types, String keyword, Pageable pageable) {
+        //p.634 BoardListReplyCountDTO -> BoardListAllDTO 변경
+
+        QBoard board = QBoard.board; // 게시글 객체
+        QReply reply = QReply.reply; // 댓글 객체
+        // Q가 붙는 도메인은 쿼리DSL로 동적쿼리를 담당한다.
+
+        JPQLQuery<Board> boardJPQLquery = from(board); // select * from board
+       boardJPQLquery.leftJoin(reply).on(reply.board.eq(board)); // fk = pk 연결용
+        // leftJoin(연관테이블).on 조인 조건 지정
+
+        //프론트에서 검색폼에 keyword가 비었을 경우도 있고 있을경우도 있다.
+        if( (types != null && types.length >0 ) && keyword !=null ){
+            // 제목,내용,이름 값이 있고 검색어가 있으면!!!!
+
+            BooleanBuilder booleanBuilder = new BooleanBuilder(); // 선실행용 ()
+
+            for (String type : types){  // 파라미터로 넘어온 값을 String[] types
+
+                switch (type){
+                    case "t" :
+                        // 제목이면
+                        booleanBuilder.or(board.title.contains(keyword));
+                        break;
+
+                    case "c" :
+                        // 내용이면
+                        booleanBuilder.or(board.content.contains(keyword));
+                        break;
+
+                    case "w" :
+                        // 작성자 이면
+                        booleanBuilder.or(board.writer.contains(keyword));
+                        break;
+                } // 프론트에서 넘어오는 String[]값을 파악하고 적용
+            } // for문 종료
+            boardJPQLquery.where(booleanBuilder); //위에서 만든 조건을 적용 where title or content or writer
+        } // if문 종료
+
+
+        boardJPQLquery.groupBy(board); // p.635 추가
+        
+        getQuerydsl().applyPagination(pageable, boardJPQLquery); // 페이징처리
+
+
+        // p.635 제거 List<Board> boardList = boardJPQLquery.fetch();
+        //        boardList.forEach(board1 -> {
+        //            System.out.println(board1.getBno());
+        //            System.out.println(board1.getImageSet());
+        //            System.out.println("=====================");
+        //        });
+
+        //p.635 추가
+        JPQLQuery<Tuple> tupleJPQLQuery=boardJPQLquery.select(board, reply.countDistinct());
+        // Tuple 테이블을 여러개 조회할 때 (board, reply 테이블을 활용)
+
+        List<Tuple> tupleList = tupleJPQLQuery.fetch(); // 쿼리실행
+        List<BoardListAllDTO> dtoList = tupleList.stream().map(tuple -> {
+            Board board1 = (Board) tuple.get(board);
+            long replyCount = tuple.get(1,Long.class);
+            BoardListAllDTO dto = BoardListAllDTO.builder()
+                    .bno(board1.getBno())
+                    .title(board1.getTitle())
+                    .writer(board1.getWriter())
+                    .regDate(board1.getRegDate())
+                    .replyCount(replyCount)
+                    .build();
+            // DB에 있는 게시글과 댓글의 개수를 가져와 담았다
+
+            List<BoardImageDTO> imageDTOS= board1.getImageSet().stream().sorted()
+                    .map(boardImage -> BoardImageDTO.builder()
+                            .uuid(boardImage.getUuid())
+                            .fileName(boardImage.getFileName())
+                            .ord(boardImage.getOrd())
+                            .build()
+                    ).collect(Collectors.toList());
+            // 해당 게시물에 대한 첨부 파일 리스트를 담아와라
+
+            dto.setBoardImages(imageDTOS);
+
+            return dto;
+
+                }).collect(Collectors.toList());
+
+        long totalCount = tupleJPQLQuery.fetchCount();
+        return new PageImpl<>(dtoList, pageable, totalCount);
     }
 
 

@@ -1,8 +1,10 @@
 package org.mbc.board.repository;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.domain.Board;
+import org.mbc.board.domain.BoardImage;
 import org.mbc.board.dto.BoardListReplyCountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,18 +12,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @SpringBootTest // 메서드용 테스트 동작
 @Log4j2 // 로그용
 public class BoardRepositoryTests {
     // 영속성 계층에 테스트용
+    
+    
 
     @Autowired // 생성자 자동 주입
     private BoardRepository boardRepository;
+
+    @Autowired // p.626 추가
+    private ReplyRepository replyRepository;
 
     @Test
     public void testInsert(){
@@ -309,5 +318,420 @@ public class BoardRepositoryTests {
         result.getContent().forEach(board -> log.info(board));
         // BoardListReplyCountDTO(bno=100, title=제목...100(수정테스트), writer=user0, regDate=2025-07-22T11:11:46.002548, replyCount=2)
     }
+
+    //board 이미지처리 테스트
+    @Test
+    public void testInsertWithImage(){
+
+        Board board = Board.builder()
+                .title("이미지 테스트")
+                .content("첨부파일테스트")
+                .writer("tester")
+                .build();
+
+        // 첨부파일 더미데이터 string 처리
+        for (int i=0 ; i < 3 ; i++ ){
+            // 첨부파일 3개
+            board.addImage(UUID.randomUUID().toString(), "file"+i+".jpg");
+            // import java.util.UUID;   UUIDfile0.jpg UUIDfile1.jpg UUIDfile2.jpg
+
+        }
+        boardRepository.save(board);
+
+        //Hibernate:
+        //    insert
+        //    into
+        //        board
+        //        (content, moddate, regdate, title, writer)
+        //    values
+        //        (?, ?, ?, ?, ?)
+
+        //Hibernate:
+        //    insert
+        //    into
+        //        board_image
+        //        (board_bno, file_name, ord, uuid)
+        //    values
+        //        (?, ?, ?, ?)
+
+        //Hibernate:
+        //    insert
+        //    into
+        //        board_image
+        //        (board_bno, file_name, ord, uuid)
+        //    values
+        //        (?, ?, ?, ?)
+
+        //Hibernate:
+        //    insert
+        //    into
+        //        board_image
+        //        (board_bno, file_name, ord, uuid)
+        //    values
+        //        (?, ?, ?, ?)
+    }
+
+    @Test // 게시물 읽기 + 이미지
+    @Transactional // import jakarta.transaction.Transactional;
+    public void testReadWithImage(){
+
+        Optional<Board> result = boardRepository.findById(1L);
+        // board 테이블에 1번 게시물을 가져와라
+
+        Board board = result.orElseThrow(); // 예외가 없으면 board 객체에 담는다.
+
+        log.info(board); // 게시물 객체
+        log.info("-----------------------");
+        log.info(board.getImageSet()); // 첨부파일 객체
+        // 지연 로딩 테스트
+        // Hibernate:
+        //    select
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer
+        //    from
+        //        board b1_0
+        //    where
+        //        b1_0.bno=?
+        //2025-07-24T14:26:42.831+09:00  INFO 50080 --- [board] [    Test worker] o.m.b.repository.BoardRepositoryTests    : Board(bno=1, title=이미지 테스트, content=첨부파일테스트, writer=tester)
+        //2025-07-24T14:26:42.834+09:00  INFO 50080 --- [board] [    Test worker] o.m.b.repository.BoardRepositoryTests    : -----------------------
+        //
+        //failed to lazily initialize a collection of role: org.mbc.board.domain.Board.imageSet: could not initialize proxy - no Session  //
+        // 지연로딩시에 no Session 연결된 정보가 사라져서 @Transactional을 적용하면 추가적인 쿼리가 여러번 실행됨
+
+        // @Transactional 이후에 정상실행된다. -> 다른방법을 사용해보겠다. @EntityGraph -> BoardRepository
+        //Hibernate:
+        //    select
+        //        is1_0.board_bno,
+        //        is1_0.uuid,
+        //        is1_0.file_name,
+        //        is1_0.ord
+        //    from
+        //        board_image is1_0
+        //    where
+        //        is1_0.board_bno=?
+        //2025-07-24T14:29:52.481+09:00  INFO 42548 --- [board] [    Test worker] o.m.b.repository.BoardRepositoryTests    : [BoardImage(uuid=4d531914-b44b-466a-9f3d-ea42e2b315a2, fileName=file0.jpg, ord=0), BoardImage(uuid=f86a4399-feba-4b44-9088-f926643e51b3, fileName=file1.jpg, ord=1), BoardImage(uuid=6ea8ab57-3997-4b3d-9014-78748f4d5414, fileName=file2.jpg, ord=2)]
+    }
+
+    @Test
+    public void testReadWithImagesEntityGraph(){
+        Optional<Board> result = boardRepository.findByIdWithImage(1L);
+        //                                       repository에 만든 JQPL 활용  @EntityGraph
+        Board board = result.orElseThrow();
+        log.info(board);
+        log.info("-----------------------");
+        for (BoardImage boardImage : board.getImageSet()) {
+            log.info(boardImage);
+        }
+        //Hibernate:
+        //    select
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        is1_0.board_bno,
+        //        is1_0.uuid,
+        //        is1_0.file_name,
+        //        is1_0.ord,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer
+        //    from
+        //        board b1_0
+        //    left join
+        //        board_image is1_0
+        //            on b1_0.bno=is1_0.board_bno
+        //    where
+        //        b1_0.bno=?
+
+        //  @EntityGraph을 활용하니 지연로딩이지만 select 문이 한번에 이루어짐 !!! 결과는 빠름
+    }
+
+    @Transactional
+    @Commit // 두 테이블이 결과가 둘다 ok(ture) 처리되면 영구 저장
+    @Test
+    public void testModifyImages(){
+
+        Optional<Board> result = boardRepository.findByIdWithImage(1L);
+        Board board = result.orElseThrow();
+
+        board.clearImages(); // board 테이블에 연결된 Image 테이블을 전체 삭제
+
+        for(int i=0 ; i < 2 ; i++ ){
+            // 전에는 3개의 첨부지만 2로 수정 하려 함
+            board.addImage(UUID.randomUUID().toString(), "updatefile"+i+".jpg");
+
+        }
+        boardRepository.save(board);
+        //Hibernate:
+        //    select
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        is1_0.board_bno,
+        //        is1_0.uuid,
+        //        is1_0.file_name,
+        //        is1_0.ord,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer
+        //    from
+        //        board b1_0
+        //    left join
+        //        board_image is1_0
+        //            on b1_0.bno=is1_0.board_bno
+        //    where
+        //        b1_0.bno=?    // board테이블과 image 테이블 모든 값을 가져와!!
+        //Hibernate:
+        //    select
+        //        bi1_0.uuid,
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer,
+        //        bi1_0.file_name,
+        //        bi1_0.ord
+        //    from
+        //        board_image bi1_0
+        //    left join
+        //        board b1_0
+        //            on b1_0.bno=bi1_0.board_bno
+        //    where
+        //        bi1_0.uuid=?
+        //Hibernate:
+        //    select
+        //        bi1_0.uuid,
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer,
+        //        bi1_0.file_name,
+        //        bi1_0.ord
+        //    from
+        //        board_image bi1_0
+        //    left join
+        //        board b1_0
+        //            on b1_0.bno=bi1_0.board_bno    // 3번의 같은 쿼리가 실행됨!!! (이미지가 3개라)
+        //    where
+        //        bi1_0.uuid=?
+        //Hibernate:
+        //    insert
+        //    into
+        //        board_image
+        //        (board_bno, file_name, ord, uuid)
+        //    values
+        //        (?, ?, ?, ?)
+        //Hibernate:
+        //    insert
+        //    into
+        //        board_image
+        //        (board_bno, file_name, ord, uuid)
+        //    values
+        //        (?, ?, ?, ?)              // 새로운 이미지가 2개  삽입
+        //Hibernate:
+        //    update
+        //        board_image
+        //    set
+        //        board_bno=?,
+        //        file_name=?,
+        //        ord=?
+        //    where
+        //        uuid=?
+        //Hibernate:
+        //    update
+        //        board_image
+        //    set
+        //        board_bno=?,
+        //        file_name=?,
+        //        ord=?
+        //    where
+        //        uuid=?
+        //Hibernate:
+        //    update
+        //        board_image
+        //    set
+        //        board_bno=?,
+        //        file_name=?,
+        //        ord=?
+        //    where
+        //        uuid=?            // 업데이트가 3번 이루어짐 !!! (삭제대신 업데이트가 됨)
+        //                             cascade = all로 설정한 영향
+        //                             cascase에 orphanRemoval 값을 ture로 넣어야 실제 삭제됨
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testRemoveAll(){
+        // 1번 게시물을 삭제하면 댓글과 첨부파일이 모두 삭제 되어야 함
+        Long bno = 1L;
+        replyRepository.deleteByBoard_Bno(bno); // 자식부터 삭제
+        boardRepository.deleteById(bno); // 부모 삭제
+
+        //Hibernate:
+        //    select
+        //        r1_0.rno,
+        //        r1_0.board_bno,
+        //        r1_0.moddate,
+        //        r1_0.regdate,
+        //        r1_0.reply_text,
+        //        r1_0.replyer
+        //    from
+        //        reply r1_0
+        //    left join
+        //        board b1_0
+        //            on b1_0.bno=r1_0.board_bno
+        //    where
+        //        b1_0.bno=?
+        //Hibernate:
+        //    select
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer
+        //    from
+        //        board b1_0
+        //    where
+        //        b1_0.bno=?
+        //Hibernate:
+        //    select
+        //        is1_0.board_bno,
+        //        is1_0.uuid,
+        //        is1_0.file_name,
+        //        is1_0.ord
+        //    from
+        //        board_image is1_0
+        //    where
+        //        is1_0.board_bno=?
+        //Hibernate:
+        //    delete
+        //    from
+        //        board_image
+        //    where
+        //        uuid=?
+        //Hibernate:
+        //    delete
+        //    from
+        //        board_image
+        //    where
+        //        uuid=?
+        //Hibernate:
+        //    delete
+        //    from
+        //        board
+        //    where
+        //        bno=?
+        // 댓글 있는지 확인 -> 게시물 확인 -> 이미지 확인 -> 댓글이 없으니 skip
+        // 이미지 2개 삭제 -> 게시물 삭제
+    }
+
+    @Test
+    public void testInsertAll(){
+        // 게시글과 댓글과 첨부파일 더미데이터 추가용
+
+        for(int i=1; i<=100; i++){
+            Board board = Board.builder()
+                    .title("테스트제목["+i+"]")
+                    .content("테스트내용["+i+"]")
+                    .writer("작성자["+i+"]")
+                    .build();
+            for(int j=0; j<3; j++){
+                if(i % 5 == 0){
+                    continue; // 5의 배수 게시물에는 첨부파일이 없다
+                }
+                board.addImage(UUID.randomUUID().toString(), "file"+i+".jpg");
+            }//for j종료 첨부파일 더미데이터
+            boardRepository.save(board);
+        }//for i 종료 게시물 더미데이터
+
+    } // testInsertALL 종료
+    
+    @Test // N+1 오류발생 테스트
+    @Transactional
+    public void testSearchImageReplyCount(){
+        // 리스트 페이지에서 댓글 수와 게시물목록 이미지가 처리되는 부분
+        Pageable pageable = PageRequest.of(1,10, Sort.by("bno").descending());
+        boardRepository.searchWithAll(null, null, pageable);
+        //                              타입          키워드     페이징
+        //Hibernate:
+        //    select
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer
+        //    from
+        //        board b1_0
+        //    left join
+        //        reply r1_0
+        //            on r1_0.board_bno=b1_0.bno
+        //    order by
+        //        b1_0.bno desc
+        //    limit
+        //        ?, ?
+        // ............생략
+        //81
+        //Hibernate:
+        //    select
+        //        is1_0.board_bno,
+        //        is1_0.uuid,
+        //        is1_0.file_name,
+        //        is1_0.ord
+        //    from
+        //        board_image is1_0
+        //    where
+        //        is1_0.board_bno=?
+        //[BoardImage(uuid=6062ed40-185f-4e80-8cbd-76a099da08c5, fileName=file81.jpg, ord=2), BoardImage(uuid=e7bc955f-3c4b-48a9-9ce5-a9ba8b3ae30c, fileName=file81.jpg, ord=0), BoardImage(uuid=be44060b-d8dc-4d21-ab3d-a1c66c8ceb28, fileName=file81.jpg, ord=1)]
+        //=====================
+        // @BatchSize(size = 20) 사용 후
+        //Hibernate:
+        //    select
+        //        b1_0.bno,
+        //        b1_0.content,
+        //        b1_0.moddate,
+        //        b1_0.regdate,
+        //        b1_0.title,
+        //        b1_0.writer
+        //    from
+        //        board b1_0
+        //    left join
+        //        reply r1_0
+        //            on r1_0.board_bno=b1_0.bno
+        //    order by
+        //        b1_0.bno desc
+        //    limit
+        //        ?, ?
+        //90
+        //Hibernate:
+        //    select
+        //        is1_0.board_bno,
+        //        is1_0.uuid,
+        //        is1_0.file_name,
+        //        is1_0.ord
+        //    from
+        //        board_image is1_0
+        //    where
+        //        is1_0.board_bno in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        //[]
+        //=====================
+        //89
+        //[BoardImage(uuid=5841b786-6519-48d7-af37-70875b312e7a, fileName=file89.jpg, ord=0), BoardImage(uuid=c34f265d-bcdd-4e06-8273-de840c12a197, fileName=file89.jpg, ord=1), BoardImage(uuid=631dba01-8c48-4813-9c07-93b5bcae5429, fileName=file89.jpg, ord=2)]
+        //=====================
+        // 목록을 처리하는 쿼리가 실행되고 
+        // board 객체의 bno를 출력한다
+        // 목록에서 나온 10개의 board 객체의 bno값을 이용해서 처리한다
+        //in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        // BatchSize에 20개를 입력해뒀기 때문에 20개의 사이즈로 이미지 테이블을 조회한다
+
+    }// testSearchImageReplyCount 종료
 
 } // 클래스 종료

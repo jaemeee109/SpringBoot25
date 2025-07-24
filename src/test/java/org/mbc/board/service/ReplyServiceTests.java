@@ -14,27 +14,27 @@ public class ReplyServiceTests {
     private ReplyService replyService;
 
     @Test
-    public void testRegister(){
-        // 프론트에서 dto가 넘어오면 댓글 DB에 등록 insert
+    public void testRegister() {
+        // 프론트에서 dto가 넘어오면 댓글 db에 등록 insert
 
         ReplyDTO replyDTO = ReplyDTO.builder()
-                .replyText("서비스에서 댓글등록")
+                .replyText("서비스에서 댓글등록테스트")
                 .replyer("서비스테스트")
-                .bno(98L)
+                .bno(98L)   // 98번 게시물에 댓글 등록 연습
                 .build();
-        log.info("=====testRegister()메서드 실행=====");
+
+        log.info("testRegister()메서드 실행....");
         log.info(replyService.register(replyDTO));
 
-        // Hibernate:
+        //Hibernate:
         //    insert
         //    into
         //        reply
         //        (board_bno, moddate, regdate, reply_text, replyer)
         //    values
         //        (?, ?, ?, ?, ?)
-        //2025-07-23T10:38:31.728+09:00  INFO 248 --- [board] [    Test worker] o.mbc.board.service.ReplyServiceTests    : 2
+        //  o.mbc.board.service.ReplyServiceTests    : 3
 
+    }
 
-
-    } // testRegister 종료
-} // class종료
+}

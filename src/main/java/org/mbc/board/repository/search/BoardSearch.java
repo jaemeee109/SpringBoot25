@@ -1,6 +1,7 @@
 package org.mbc.board.repository.search;
 
 import org.mbc.board.domain.Board;
+import org.mbc.board.dto.BoardListAllDTO;
 import org.mbc.board.dto.BoardListReplyCountDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,9 @@ public interface BoardSearch {
     // 게시판 리스트 /board/list 화면 출력용 메서드 (페이징, 정렬, 댓글수)
     Page<BoardListReplyCountDTO> searchWithReplyCount(String[] types, String keyword, Pageable pageable);
     //                                                 제목,내용,작성자    찾는단어       페이징처리,정렬
+
+    // p.628 /board/list 화면 출력용 (페이징, 정렬, 댓글수, 썸네일)
+    Page<BoardListAllDTO> searchWithAll(String[] types, String keyword, Pageable pageable);
+    // p.634 BoardListReplyCountDTO -> BoardListAllDTO 변경
+
 }
