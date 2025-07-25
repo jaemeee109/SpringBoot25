@@ -8,12 +8,12 @@ import org.mbc.board.domain.*;
 import org.mbc.board.dto.BoardImageDTO;
 import org.mbc.board.dto.BoardListAllDTO;
 import org.mbc.board.dto.BoardListReplyCountDTO;
+import org.modelmapper.internal.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,19 +36,19 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         // 다중조건일때 연산자 공식에 의해서 특수기호가 먼저 계산될 때가 있다.
         // ( )를 사용하면 선행 되기 때문에 BooleanBuilder가 이 역할을 한다. 
-        
+
         // query.where(board.title.contains("1")); // where title like 1
         // select * from board where title like 1
         // contains 포함
 
-        booleanBuilder.or(board.title.contains("11")) ; // where title like 11
-        booleanBuilder.or(board.content.contains("11")) ; // where content like        
-         
-        
-        query.where(booleanBuilder) ;  // // ( where title like 11 or content like 11)
-        query.where(board.bno.gt(0L)) ; // pk를 이용해서 빠른 검색 where이 추가되면 and 조건
+        booleanBuilder.or(board.title.contains("11")); // where title like 11
+        booleanBuilder.or(board.content.contains("11")); // where content like
+
+
+        query.where(booleanBuilder);  // // ( where title like 11 or content like 11)
+        query.where(board.bno.gt(0L)); // pk를 이용해서 빠른 검색 where이 추가되면 and 조건
         //  where ( title like 11 or content like 11) and bno > 0
-        
+
         // 페이징 처리용 코드
         this.getQuerydsl().applyPagination(pageable, query);
 
@@ -68,25 +68,25 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         JPQLQuery<Board> query = from(board); // select * from board
 
         //프론트에서 검색폼에 keyword가 비었을 경우도 있고 있을경우도 있다.
-        if( (types != null && types.length >0 ) && keyword !=null ){
+        if ((types != null && types.length > 0) && keyword != null) {
             // 제목,내용,이름 값이 있고 검색어가 있으면!!!!
 
             BooleanBuilder booleanBuilder = new BooleanBuilder(); // 선실행용 ()
 
-            for (String type : types){  // 파라미터로 넘어온 값을 String[] types
+            for (String type : types) {  // 파라미터로 넘어온 값을 String[] types
 
-                switch (type){
-                    case "t" :
+                switch (type) {
+                    case "t":
                         // 제목이면
                         booleanBuilder.or(board.title.contains(keyword));
                         break;
 
-                    case "c" :
+                    case "c":
                         // 내용이면
                         booleanBuilder.or(board.content.contains(keyword));
                         break;
 
-                    case "w" :
+                    case "w":
                         // 작성자 이면
                         booleanBuilder.or(board.writer.contains(keyword));
                         break;
@@ -100,10 +100,10 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         this.getQuerydsl().applyPagination(pageable, query); // 페이징처리용 코드 + 쿼리문
 
         // Page<t> 클래스는 3가지의 리턴 타입을 만들어 준다.
-        
+
         List<Board> list = query.fetch(); // 쿼리문 실행
 
-        long count = query.fetchCount() ; // 검색된 게시물 수
+        long count = query.fetchCount(); // 검색된 게시물 수
 
         //Hibernate:
         //    select
@@ -126,7 +126,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         //        b1_0.bno desc
         //    limit
         //        ?, ?
-        
+
         return new PageImpl<>(list, pageable, count);
         //         리턴      검색된결과 board 
         //                          페이징처리용
@@ -152,25 +152,25 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         query.groupBy(board); // board와 연관된 객체를 모아
 
         //프론트에서 검색폼에 keyword가 비었을 경우도 있고 있을경우도 있다.
-        if( (types != null && types.length >0 ) && keyword !=null ){
+        if ((types != null && types.length > 0) && keyword != null) {
             // 제목,내용,이름 값이 있고 검색어가 있으면!!!!
 
             BooleanBuilder booleanBuilder = new BooleanBuilder(); // 선실행용 ()
 
-            for (String type : types){  // 파라미터로 넘어온 값을 String[] types
+            for (String type : types) {  // 파라미터로 넘어온 값을 String[] types
 
-                switch (type){
-                    case "t" :
+                switch (type) {
+                    case "t":
                         // 제목이면
                         booleanBuilder.or(board.title.contains(keyword));
                         break;
 
-                    case "c" :
+                    case "c":
                         // 내용이면
                         booleanBuilder.or(board.content.contains(keyword));
                         break;
 
-                    case "w" :
+                    case "w":
                         // 작성자 이면
                         booleanBuilder.or(board.writer.contains(keyword));
                         break;
@@ -190,7 +190,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
                         board.writer,
                         board.regDate,  // entity
                         reply.count().as("replyCount")  // 댓글의 개수를 replyCount 필드에 넣음
-                        ));
+                ));
 
         // 리턴값을 제공
         this.getQuerydsl().applyPagination(pageable, dtoQuery); // dto로 변환된 코드가 적용
@@ -241,70 +241,72 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         //            or b1_0.writer like ? escape '!'
         //        )
         //        and b1_0.bno>?
-        
+
     }
 
     @Override
     public Page<BoardListAllDTO> searchWithAll(String[] types, String keyword, Pageable pageable) {
-        //p.634 BoardListReplyCountDTO -> BoardListAllDTO 변경
-
+        // BoardListReplyCountDTO -> BoardListAllDTO p634 변경
         QBoard board = QBoard.board; // 게시글 객체
         QReply reply = QReply.reply; // 댓글 객체
         // Q가 붙는 도메인은 쿼리DSL로 동적쿼리를 담당한다.
 
-        JPQLQuery<Board> boardJPQLquery = from(board); // select * from board
-       boardJPQLquery.leftJoin(reply).on(reply.board.eq(board)); // fk = pk 연결용
-        // leftJoin(연관테이블).on 조인 조건 지정
+        JPQLQuery<Board> boardJPQLQuery = from(board); // select * from board
+        boardJPQLQuery.leftJoin(reply).on(reply.board.eq(board)); // fk = pk 연결용
+        //    leftJoin(연관테이블).on 조인 조건을 지정
 
         //프론트에서 검색폼에 keyword가 비었을 경우도 있고 있을경우도 있다.
-        if( (types != null && types.length >0 ) && keyword !=null ){
+        if ((types != null && types.length > 0) && keyword != null) {
             // 제목,내용,이름 값이 있고 검색어가 있으면!!!!
 
             BooleanBuilder booleanBuilder = new BooleanBuilder(); // 선실행용 ()
 
-            for (String type : types){  // 파라미터로 넘어온 값을 String[] types
+            for (String type : types) {  // 파라미터로 넘어온 값을 String[] types
 
-                switch (type){
-                    case "t" :
+                switch (type) {
+                    case "t":
                         // 제목이면
                         booleanBuilder.or(board.title.contains(keyword));
                         break;
 
-                    case "c" :
+                    case "c":
                         // 내용이면
                         booleanBuilder.or(board.content.contains(keyword));
                         break;
 
-                    case "w" :
+                    case "w":
                         // 작성자 이면
                         booleanBuilder.or(board.writer.contains(keyword));
                         break;
                 } // 프론트에서 넘어오는 String[]값을 파악하고 적용
             } // for문 종료
-            boardJPQLquery.where(booleanBuilder); //위에서 만든 조건을 적용 where title or content or writer
-        } // if문 종료
+            boardJPQLQuery.where(booleanBuilder); //위에서 만든 조건을 적용 where title or content or writer
+        }
+        boardJPQLQuery.groupBy(board); // p635 추가
 
+        getQuerydsl().applyPagination(pageable, boardJPQLQuery);  // 페이징 처리
 
-        boardJPQLquery.groupBy(board); // p.635 추가
-        
-        getQuerydsl().applyPagination(pageable, boardJPQLquery); // 페이징처리
+        // p635 제거 List<Board> boardList = boardJPQLQuery.fetch();
 
+        //  p635 제거       boardList.forEach(board1 -> {
+        //  p635 제거          System.out.println(board1.getBno());
+        //  p635 제거           System.out.println(board1.getImageSet());
+        //  p635 제거          System.out.println("------------------------");
+        //  p635 제거
+        //  p635 제거      });
 
-        // p.635 제거 List<Board> boardList = boardJPQLquery.fetch();
-        //        boardList.forEach(board1 -> {
-        //            System.out.println(board1.getBno());
-        //            System.out.println(board1.getImageSet());
-        //            System.out.println("=====================");
-        //        });
-
-        //p.635 추가
-        JPQLQuery<Tuple> tupleJPQLQuery=boardJPQLquery.select(board, reply.countDistinct());
-        // Tuple 테이블을 여러개 조회할 때 (board, reply 테이블을 활용)
+        // p635추가
+        JPQLQuery<Tuple> tupleJPQLQuery = boardJPQLQuery.select(board, reply.countDistinct());
+        // Tuple 테이블을 여러게 조회용 (board, reply 테이블을 활용)
+        // https://doing7.tistory.com/129
 
         List<Tuple> tupleList = tupleJPQLQuery.fetch(); // 쿼리실행
+
         List<BoardListAllDTO> dtoList = tupleList.stream().map(tuple -> {
+
             Board board1 = (Board) tuple.get(board);
-            long replyCount = tuple.get(1,Long.class);
+            long replyCount = tuple.get(1, Long.class);
+
             BoardListAllDTO dto = BoardListAllDTO.builder()
                     .bno(board1.getBno())
                     .title(board1.getTitle())
@@ -312,24 +314,25 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
                     .regDate(board1.getRegDate())
                     .replyCount(replyCount)
                     .build();
-            // DB에 있는 게시글과 댓글의 개수를 가져와 담았다
+            // db에 있는 게시글과 댓글의 개수를 가져와 담았다.!!!
 
-            List<BoardImageDTO> imageDTOS= board1.getImageSet().stream().sorted()
+            List<BoardImageDTO> imageDTOS = board1.getImageSet().stream().sorted()
                     .map(boardImage -> BoardImageDTO.builder()
                             .uuid(boardImage.getUuid())
                             .fileName(boardImage.getFileName())
                             .ord(boardImage.getOrd())
                             .build()
                     ).collect(Collectors.toList());
-            // 해당 게시물에 대한 첨부 파일 리스트를 담아와라
+            // 해당게시물에 대한 첨부파일 리스트를 담아와!!!
 
             dto.setBoardImages(imageDTOS);
 
             return dto;
 
-                }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
-        long totalCount = tupleJPQLQuery.fetchCount();
+        long totalCount = boardJPQLQuery.fetchCount();
+
         return new PageImpl<>(dtoList, pageable, totalCount);
     }
 

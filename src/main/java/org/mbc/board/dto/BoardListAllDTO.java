@@ -13,12 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardListAllDTO {
-    // 게시물 list 페이지의 게시물, 이미지(썸네일),댓글 개수
+    // 게시물 list페이지에  게시물, 이미지(섬네일), 댓글 개수
 
     private Long bno;
     private String title;
     private String writer;
-    private String content;
     private LocalDateTime regDate;
     private Long replyCount;
     private List<BoardImageDTO> boardImages;

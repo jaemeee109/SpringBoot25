@@ -11,11 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BoardImageDTO {
     // BoardImage 엔티티를 프론트로 보내는 DTO
-
+    
     private String uuid;
     private String fileName;
     private int ord; // 이미지 순서정보
-
-
-
 }

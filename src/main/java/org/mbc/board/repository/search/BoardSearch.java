@@ -20,8 +20,10 @@ public interface BoardSearch {
     Page<BoardListReplyCountDTO> searchWithReplyCount(String[] types, String keyword, Pageable pageable);
     //                                                 제목,내용,작성자    찾는단어       페이징처리,정렬
 
-    // p.628 /board/list 화면 출력용 (페이징, 정렬, 댓글수, 썸네일)
+    // p628 /board/list화면 출력용 (페이징, 정렬, 댓글수, 섬네일, 게시글 리스트)
     Page<BoardListAllDTO> searchWithAll(String[] types, String keyword, Pageable pageable);
-    // p.634 BoardListReplyCountDTO -> BoardListAllDTO 변경
+    // BoardListReplyCountDTO -> BoardListAllDTO p634
+
+
 
 }
