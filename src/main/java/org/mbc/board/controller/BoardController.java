@@ -1,17 +1,11 @@
 package org.mbc.board.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.mbc.board.dto.BoardDTO;
-import org.mbc.board.dto.BoardListReplyCountDTO;
-import org.mbc.board.dto.PageRequestDTO;
-import org.mbc.board.dto.PageResponseDTO;
-import org.mbc.board.service.BoardService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.mbc.board.dto.*;
+import org.mbc.board.service.BoardService;
+
+import jakarta.validation.Valid;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -30,10 +28,8 @@ import java.util.List;
 @RequiredArgsConstructor // final을 붙인 필드로 생성자 만듬.
 public class BoardController {
 
-    // p.675
-    @Value("${org.mbc.upload.path}") // import springframework
+    @Value("${org.mbc.upload.path")
     private String uploadPath;
-
     private final BoardService boardService;
 
     @GetMapping("/list")
@@ -43,8 +39,8 @@ public class BoardController {
         // p548쪽 제외PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
         // 페이징 처리가 되는 요청을 처리하고 결과를 response로 받는다.
 
-        PageResponseDTO<BoardListReplyCountDTO> responseDTO =
-                boardService.listWithReplyCount(pageRequestDTO);
+        PageResponseDTO<BoardListAllDTO> responseDTO =
+                boardService.listWithAll(pageRequestDTO); // p662 수정
         // 댓글의 갯수용 dto로 프론트 전달!!
 
         log.info(responseDTO);
@@ -53,10 +49,12 @@ public class BoardController {
     }
 
 
+    @PreAuthorize("hasRole('USER')") // User.roles("ADMIN","SYS","USER") // User.authorities("ROLE_USER")
     @GetMapping("/register")
     public void registerGET(){
+        //http://localhost/board/register로 들어오면 board.register.html로 간다
 
-    }
+    } //registerGET종료
 
     @PostMapping("/register")
     public String registerPost(@Valid BoardDTO boardDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes){
@@ -92,7 +90,7 @@ public class BoardController {
 //
 //    }
 
-
+    @PreAuthorize("isAuthenticated()") // 로그인한 상태이면 (권한에 상관없음)
     @GetMapping({"/read", "/modify"})
     public void read(Long bno, PageRequestDTO pageRequestDTO, Model model){
 
@@ -103,7 +101,8 @@ public class BoardController {
         model.addAttribute("dto", boardDTO);
 
     }
-
+    
+    @PreAuthorize("principal.username == #boardDTO.writer") //p.714 로그인한 사용자와 작성자가 같은지
     @PostMapping("/modify")
     public String modify( PageRequestDTO pageRequestDTO,
                           @Valid BoardDTO boardDTO,
@@ -133,51 +132,47 @@ public class BoardController {
         return "redirect:/board/read";
     }
 
-
+    @PreAuthorize("principal.username == #boardDTO.writer") //p.719 작성자가 삭제 가능
     @PostMapping("/remove")
     public String remove(BoardDTO boardDTO, RedirectAttributes redirectAttributes) {
 
         Long bno = boardDTO.getBno();
-        // log.info("remove post.. " + bno);
 
         boardService.remove(bno);
 
-        /* 게시물이 데이터베이스상에서 삭제 되었다면 첨부파일 삭제 */
-       /* log.info(boardDTO.getFileNames());*/
         List<String> fileNames = boardDTO.getFileNames();
         if(fileNames != null && fileNames.size() > 0) {
             removeFiles(fileNames);
-
         }
-
         redirectAttributes.addFlashAttribute("result", "removed");
 
         return "redirect:/board/list";
 
     }
 
-    /* P.676*/
     private void removeFiles(List<String> files) {
 
         for (String fileName:files) {
-
+            // import org.springframework.core.io.Resource
             Resource resource = new FileSystemResource(uploadPath + File.separator + fileName);
-
             String resourceName = resource.getFilename();
 
-            try{
+
+            try {
                 String contentType = Files.probeContentType(resource.getFile().toPath());
                 resource.getFile().delete();
 
-                // 섬네일이 존재한다면
-                if(contentType.startsWith("image")){
-                    File thumbnailFile = new File(uploadPath + File.separator + "s_"+ fileName);
+                //섬네일이 존재한다면
+                if (contentType.startsWith("image")) {
+                    File thumbnailFile = new File(uploadPath + File.separator + "s_" + fileName);
                     thumbnailFile.delete();
                 }
-            }catch(Exception e){
-                log.error(e);
+
+            } catch (Exception e) {
+                log.error(e.getMessage());
             }
-        } // for 종료
-    } //removeFiles 종료
+
+        }//end for
+    }
 
 }

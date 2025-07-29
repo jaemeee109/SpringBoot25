@@ -67,7 +67,7 @@
         </div><!-- end col-->
     </div><!-- end row-->
 
-    <!--665 첨부 파일 섬네일을 보여줄 부분 -->
+    <!—- 665 첨부 파일 섬네일을 보여줄 부분 -->
     <div class="row mt-3">
         <div class="col ">
             <div class="container-fluid d-flex uploadResult" style="flex-wrap: wrap;">
@@ -87,7 +87,7 @@
         </div>
     </div>
 
-   <!-- P. 666 추가 첨부파일 추가를 위한 모달창 -->
+    <!—- 666 추가 첨부파일 추가를 위한 모달창 -->
     <div class="modal uploadModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -133,8 +133,6 @@
     const link = [[${pageRequestDTO.getLink()}]]
     const formObj = document.querySelector("#f1")
 
-
-    /* p.671*/
     document.querySelector(".modBtn").addEventListener("click", function(e){
         e.preventDefault()
         e.stopPropagation()
@@ -198,7 +196,7 @@
         targetDiv.remove()
     }
 
-    // p.670 업로드 모달
+    // 670 추가 업로드 모달
     const uploadModal = new bootstrap.Modal(document.querySelector(".uploadModal"))
 
     document.querySelector(".uploadFileBtn").addEventListener("click", function(e){

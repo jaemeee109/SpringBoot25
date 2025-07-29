@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       layout:decorate="~{layout/basic.html}">
 
 <head>
@@ -28,7 +29,8 @@
 
             <div class="input-group mb-3">
               <span class="input-group-text">Writer</span>
-              <input type="text" name="writer" class="form-control" placeholder="Writer">
+              <input type="text" name="writer" class="form-control" placeholder="Writer"
+                     th:value="${#authentication.principal.username}" readonly>
 
             </div>
 
@@ -82,7 +84,7 @@
         </div>
       </div>
     </div>
-  </div> <!-- end registerModal -->
+  </div> <!-- end modifyModal -->
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/js/upload.js"></script>
@@ -95,6 +97,11 @@
   // public String registerPost(@Valid BoardDTO boardDTO, .....
   // AddFlashAttribute()를 통해서 errors라는 이름으로 에러메시지들이 전송됨.
   // list.html 에서 result 변수를 통해 모달창을 처리함.
+
+  // p708 쪽 로그인시 자동으로 작성자가 들어간다.
+  const auth = [[${#authentication.principal}]] // 로그인한 객체
+  //console.log(auth)
+
   const errors = [[${errors}]]
   console.log(errors)
 
@@ -132,7 +139,7 @@
     }
 
     // upload.js 활용
-    uploadToserver(formObj).then(result => {
+    uploadToServer(formObj).then(result => {
       // console.log(result)
       for(const uploadResult of result){  // p656 섬네일 표시용
         showUploadFile(uploadResult)
@@ -171,8 +178,8 @@
     const targetDiv=obj.closest(".card") // card 객체가 닫힘
     // upload.js에 있는 함수
     removeFileToServer(uuid,fileName).then(data =>{
-            // 실제 저장소에 파일 삭제용
-            targetDiv.remove()
+      // 실제 저장소에 파일 삭제용
+      targetDiv.remove()
     })
 
   } // removeFile 함수 종료
