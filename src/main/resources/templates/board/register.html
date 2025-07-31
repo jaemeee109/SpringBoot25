@@ -30,7 +30,7 @@
             <div class="input-group mb-3">
               <span class="input-group-text">Writer</span>
               <input type="text" name="writer" class="form-control" placeholder="Writer"
-                     th:value="${#authentication.principal.username}" readonly>
+              th:value="${#authentication.principal.username}" readonly>
 
             </div>
 
@@ -178,8 +178,8 @@
     const targetDiv=obj.closest(".card") // card 객체가 닫힘
     // upload.js에 있는 함수
     removeFileToServer(uuid,fileName).then(data =>{
-      // 실제 저장소에 파일 삭제용
-      targetDiv.remove()
+            // 실제 저장소에 파일 삭제용
+            targetDiv.remove()
     })
 
   } // removeFile 함수 종료
