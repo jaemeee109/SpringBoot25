@@ -30,21 +30,19 @@ public class Custom403Handler implements AccessDeniedHandler {
         log.info("403예외발생중.!!!!!!!");
 
         response.setStatus(HttpStatus.FORBIDDEN.value()); // 현재 예외상태값 저장
+
         String contentType = request.getHeader("Content-Type"); // json 여부
-        boolean jsonRequest = contentType.startsWith("application/json");
+        boolean jsonRequest = contentType != null && contentType.startsWith("application/json");
+
         log.info("isJSON : " + jsonRequest);  // json일때 처리 끝
 
         // 일반요청시
-        if(!jsonRequest) {
-            response.sendRedirect("/member/login?error=ACCESS_DENIED");
-        } // 403예외발생시 로그인 화면으로 이동하고 error 처리
-
+        if (!jsonRequest) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+            return;
+        }
     }
 
-
-
-
-    // Ajax 비동기 처리 JSON 처리
 
 
 }

@@ -8,7 +8,6 @@ import org.mbc.board.security.handler.CustomSocialLoginSuccessHandler;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -19,8 +18,11 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Log4j2 // 로그 출력용
 @Configuration  // 환경설정임을 명시
@@ -113,6 +115,11 @@ public class CustomSecurityConfig {
             // 하단에 메서드 추가
         });
 
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().permitAll()
+                );
+
         return http.build();
     }
 
@@ -144,7 +151,7 @@ public class CustomSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         // p689 패스워드를 암호화 처리하는 용도
-        log.info("======= 패스워드 암화기법 처리 메서드 실행 =======");
+        log.info("======= 패스워드 암호화기법 처리 메서드 실행 =======");
         return new BCryptPasswordEncoder(); // 해시코드로 암호화기법을 적용
     }
 
@@ -153,4 +160,8 @@ public class CustomSecurityConfig {
         return new CustomSocialLoginSuccessHandler(passwordEncoder());
         // 기존 내장된 것을 커스텀한 객체로 활용
     }
+
+
+
+
 }

@@ -30,6 +30,8 @@ public class MemberRepositoryTests {
                     .mid("member"+i)
                     .mpw(passwordEncoder.encode("1111"))
                     .email("email"+i+"@mbc.org")
+                    .name("유저"+i)
+                    .address("주소"+i)
                     .build();
 
             // 해당회원의 role이 적용

@@ -20,6 +20,8 @@ public class MemberSecurityDTO extends User implements OAuth2User { //extends Us
     private String email;
     private boolean del;
     private boolean social;
+    private String name;
+    private String address;
     
     // 소셜로그인 정보 p.754 추가
     private Map<String, Object> props; //properties약자
@@ -37,6 +39,8 @@ public class MemberSecurityDTO extends User implements OAuth2User { //extends Us
         this.email = email;
         this.del = del;
         this.social = social;
+        this.name = name;
+        this.address = address;
     }
 
 

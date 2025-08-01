@@ -34,8 +34,11 @@ dependencies {
     // 스프링 시큐리티 추가 : 로그인 처리용 p678 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
     implementation("org.springframework.boot:spring-boot-starter-security:3.4.7")
 
-    // 스프링 시큐리티6+타입리프 https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6
+    // 스프링 시큐리티6+타임리프 https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
+
+    // 시큐리티 테스트 추가Q
+    testImplementation 'org.springframework.security:spring-security-test'
 
     // 카카오로그인 oauth2 추가
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-client
@@ -98,5 +101,7 @@ sourceSets {
 ******** 주의사항 : 엔티티나 dto를 건딜면 Q도메인을 다시 생성해야 한다.***********
 삭제 방법 -> 오른쪽 Gradle 메뉴 -> Tasks->build->clean 후 재생성
 */
+
+
 
 compileJava.dependsOn('clean')

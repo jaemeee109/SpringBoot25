@@ -24,6 +24,11 @@ public class Member extends BaseEntity {
     private String email; // 이메일
     private boolean del ; // 회원탈퇴
 
+
+    private String name; // 유저이름
+    private String address; //주소
+
+
     private boolean social ; // 카톡,구글 로그인 기법 유무
 
     // 회원롤 관리(user,admin)
