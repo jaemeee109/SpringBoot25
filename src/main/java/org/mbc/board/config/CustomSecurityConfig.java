@@ -115,10 +115,11 @@ public class CustomSecurityConfig {
             // 하단에 메서드 추가
         });
 
-        http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
-                );
+
+     http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().permitAll()
+        );
 
         return http.build();
     }

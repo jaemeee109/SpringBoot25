@@ -3,17 +3,18 @@ package org.mbc.board.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.mbc.board.domain.BaseEntity;
 
 @Entity
 @Getter
 @Setter
 @Table(name="cart_item")
-public class CartItem {
+public class CartItem extends BaseEntity {
 
     @Id
     @GeneratedValue
     @Column(name="cart_item_id")
-    private Long id;
+    private Long mid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="cart_id")

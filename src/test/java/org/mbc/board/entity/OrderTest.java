@@ -3,6 +3,7 @@ package org.mbc.board.entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.domain.Member;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@Log4j2
 public class OrderTest {
 
     @Autowired
@@ -67,7 +69,7 @@ public class OrderTest {
         orderRepository.saveAndFlush(order);
         em.clear();
 
-        Order saveOrder = orderRepository.findById(order.getId())
+        Order saveOrder = orderRepository.findById(order.getMid())
                 .orElseThrow(EntityNotFoundException::new);
         assertEquals(3, saveOrder.getOrderItems().size());
 
@@ -119,15 +121,15 @@ public class OrderTest {
     public void lazyLoadingTest(){
         //지연 로딩 테스트
         Order order = this.createOrder();
-        Long orderItemId = order.getOrderItems().get(0).getId();
+        Long orderItemId = order.getOrderItems().get(0).getMid();
         em.flush();
         em.clear();
 
         OrderItem orderItem = orderItemRepository.findById(orderItemId).orElseThrow(EntityNotFoundException::new);
-        System.out.println("Order class: "+orderItem.getOrder().getClass());
-        System.out.println("================");
+        log.info("Order class: "+orderItem.getOrder().getClass());
+        log.info("================");
         orderItem.getOrder().getOrderDate();
-        System.out.println("================");
+        log.info("================");
 
     }//lazyLoadingTest()종료
 }//class 종료

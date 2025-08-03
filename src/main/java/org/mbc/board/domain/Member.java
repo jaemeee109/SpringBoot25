@@ -1,10 +1,10 @@
 package org.mbc.board.domain;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+import org.mbc.board.constant.Role;
+import org.mbc.board.dto.MemberJoinDTO;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,12 +28,16 @@ public class Member extends BaseEntity {
     private String name; // 유저이름
     private String address; //주소
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
 
     private boolean social ; // 카톡,구글 로그인 기법 유무
 
     // 회원롤 관리(user,admin)
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private Set<MemberRole> roleSet = new HashSet<MemberRole>();
     // Set 로또 구슬 주머니
 
@@ -64,5 +68,20 @@ public class Member extends BaseEntity {
 
     public void changeSocial(boolean social) {
         this.social = social;
+    }
+
+    public static Member createMember (MemberJoinDTO memberJoinDTO, PasswordEncoder passwordEncoder) {
+
+        Member member = Member.builder()
+                .name(memberJoinDTO.getName())
+                .email(memberJoinDTO.getEmail())
+                .address(memberJoinDTO.getAddress())
+                .mpw(passwordEncoder.encode(memberJoinDTO.getMpw()))
+                .role(Role.ADMIN)
+                .build();
+
+        member.addRole(MemberRole.ADMIN);
+        return member;
+
     }
 }

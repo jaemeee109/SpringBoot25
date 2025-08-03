@@ -44,11 +44,10 @@ public class MemberServiceImpl implements MemberService {
         // 기존에 id가 있는지 확인
         String mid = memberJoinDTO.getMid(); // 프론트에서 id가 넘어옴
         boolean exist = memberRepository.existsById(mid); // 기존에 id 있는지 찾고 t/f
-
-
-        if(exist) {
+ if(exist) {
             throw new MidExistException(); // 중복id 처리용 예외처리 발생
         }
+
         // 진짜 회원가입처리
         Member member = modelMapper.map(memberJoinDTO, Member.class);
         // 엔티티                              dto
@@ -56,9 +55,12 @@ public class MemberServiceImpl implements MemberService {
         member.changePassword(passwordEncoder.encode(memberJoinDTO.getMpw()));
         member.addRole(MemberRole.USER);  // 일반회원으로
 
+        if(mid.equals("admin")){
+            member.addRole(MemberRole.ADMIN);
+        }
         log.info("=============================");
         log.info(member);
-        log.info(member.getRoleSet());
+        log.info("회원가입 권한 :"+ member.getRoleSet());
 
         memberRepository.save(member);
 

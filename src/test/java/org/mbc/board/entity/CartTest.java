@@ -38,7 +38,7 @@ public class CartTest {
        em.flush();
        em.clear();
 
-       Cart savedCart = cartRepository.findById(cart.getId()).orElseThrow(EntityNotFoundException::new);
+       Cart savedCart = cartRepository.findById(cart.getMid()).orElseThrow(EntityNotFoundException::new);
        assertEquals(savedCart.getMember().getMid(),member.getMid());
    }
 }//class 종료

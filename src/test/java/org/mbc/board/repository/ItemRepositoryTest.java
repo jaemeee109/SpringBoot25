@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.constant.ItemSellStatus;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 /*@TestPropertySource(locations = "classpath:application-test.properties") <- 오류남 */
 @SpringBootTest
+@Log4j2
 class ItemRepositoryTest {
 
     @Autowired
@@ -39,7 +41,7 @@ class ItemRepositoryTest {
         item.setRegTime(LocalDateTime.now());
         item.setUpdateTime(LocalDateTime.now());
         Item savedItem = itemRepository.save(item);
-        System.out.println(savedItem.toString());
+        log.info(savedItem.toString());
 
     }//createItemTest() 종료
 
@@ -66,7 +68,7 @@ class ItemRepositoryTest {
         this.createItemList();
         List<Item> itemList = itemRepository.findByItemNm("테스트상품1");
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         }// for종료
 
     }// findByItemNmTest() 종료
@@ -76,7 +78,7 @@ class ItemRepositoryTest {
         this.createItemList();
         List<Item> itemList = itemRepository.findByItemNmOrItemDetail("테스트상품1", "테스트 상품 상세설명5");
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         } // for종료
     } // findByItemNmOrItemDetailTest() 종료
 
@@ -86,7 +88,7 @@ class ItemRepositoryTest {
         List<Item> itemList = itemRepository.findByPriceLessThan(10005);
         // 10005 보다 가격이 작은 상품 조회
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         } // for 종료
     } // findByPriceLessThanTest() 종료
 
@@ -95,7 +97,7 @@ class ItemRepositoryTest {
         this.createItemList();
         List<Item> itemList = itemRepository.findByPriceLessThanOrderByPriceDesc(10005);
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         } // for 종료
     }//findByPriceLessThanOrderByPriceDescTest() 종료
 
@@ -104,7 +106,7 @@ class ItemRepositoryTest {
         this.createItemList();
         List<Item> itemList = itemRepository.findByItemDetail("테스트 상품 상세 설명");
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         }//for 종료
     }//findByItemDetailTest() 
 
@@ -115,7 +117,7 @@ class ItemRepositoryTest {
         List<Item> itemList =
                 itemRepository.findByItemDetailNative("테스트 상품 상세 설명");
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         }//for 종료
     } // findByItemDetailNative() 종료
   
@@ -134,7 +136,7 @@ class ItemRepositoryTest {
         
         List<Item> itemList = query.fetch();
         for (Item item : itemList) {
-            System.out.println(item.toString());
+            log.info(item.toString());
         } //for종료
     }//queryDslTest() 종료
 
@@ -190,11 +192,11 @@ class ItemRepositoryTest {
         Pageable pageable = PageRequest.of(0, 5);
         Page<Item> itemPagingResult = itemRepository.findAll(booleanBuilder, pageable);
         itemRepository.findAll(booleanBuilder, pageable);
-        System.out.println("total elements: "+itemPagingResult.getTotalElements());
+        log.info("total elements: "+itemPagingResult.getTotalElements());
         
         List<Item> resultList = itemPagingResult.getContent();
         for(Item resultItem: resultList){
-            System.out.println(resultItem.toString());
+            log.info(resultItem.toString());
         }// for종료
     }//queryDslTest() 종료
 

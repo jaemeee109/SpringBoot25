@@ -5,20 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.mbc.board.constant.ItemSellStatus;
+import org.mbc.board.domain.BaseEntity;
+import org.mbc.board.dto.ItemFormDTO;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="Item")
+@Table(name="item")
 @Getter
 @Setter
 @ToString
-public class Item {
+public class Item extends BaseEntity {
 
     @Id
-    @Column(name="Item_id")
+    @Column(name="item_id")
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id; // 상품코드
+    private Long mid; // 상품코드
 
     @Column(nullable=false,length=50)
     private String itemNm; // 상품명
@@ -38,6 +40,14 @@ public class Item {
 
     private LocalDateTime regTime; // 등록시간
     private LocalDateTime updateTime; // 수정시간
+    
+   public void updateItem(ItemFormDTO itemFormDTO) {
+       this.itemNm = itemFormDTO.getItemNm();
+       this.price = itemFormDTO.getPrice();
+       this.stockNumber = itemFormDTO.getStockNumber();
+       this.itemDetail = itemFormDTO.getItemDetail();
+       this.itemSellStatus = itemFormDTO.getItemSellStatus();
+   }//updateItem 종료
 
 
 } // class종료
