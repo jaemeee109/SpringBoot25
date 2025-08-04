@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 import org.mbc.board.dto.ItemFormDTO;
 import org.mbc.board.dto.ItemImgDTO;
+import org.mbc.board.dto.ItemSearchDTO;
 import org.mbc.board.dto.upload.UploadResultDTO;
 import org.mbc.board.entity.Item;
 import org.mbc.board.entity.ItemImg;
 import org.mbc.board.repository.ItemRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -144,5 +147,10 @@ public class ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("이미지 삭제 대상 없음"));
 
         item.getImageSet().removeIf(img -> img.getMid().equals(imgId));
+    }
+
+    @Transactional
+    public Page<Item> getAdminItemPage(ItemSearchDTO itemSearchDTO, Pageable pageable) {
+        return itemRepository.getAdminItemPage(itemSearchDTO, pageable);
     }
 }
