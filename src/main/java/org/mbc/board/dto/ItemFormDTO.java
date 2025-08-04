@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.mbc.board.constant.ItemSellStatus;
+import org.mbc.board.domain.BoardImage;
+import org.mbc.board.dto.upload.UploadResultDTO;
 import org.mbc.board.entity.Item;
+import org.mbc.board.entity.ItemImg;
 import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
@@ -31,18 +34,28 @@ public class ItemFormDTO {
 
     private ItemSellStatus itemSellStatus;
 
-    private List<ItemImgDTO> itemImgDTOList = new ArrayList<>();
+    private List<UploadResultDTO> uploadResultDTOS = new ArrayList<>();
 
-    private List<Long> itemImgIds = new ArrayList<>();
+    private List<String> uploadFileNames;
+
+    // 기존 이미지 정보 (삭제 체크박스 용도)
+    private List<ItemImgDTO> itemImgDTOList = new ArrayList<>();
 
     private static ModelMapper modelMapper = new ModelMapper();
 
     public Item createItem(){
         return modelMapper.map(this, Item.class);
-    } //createItem 종료
+    }
 
     public static ItemFormDTO of(Item item) {
         return modelMapper.map(item, ItemFormDTO.class);
-    } //ItemFormDTO 종료
+    }
 
-} // class 종료
+
+    private List<ItemImgDTO> imgList = new ArrayList<>();
+
+    public void setItemImgDTOList(List<ItemImgDTO> list) {
+        this.imgList = list;
+    }
+
+}

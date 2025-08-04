@@ -1,13 +1,11 @@
 package org.mbc.board.service;
 
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.dto.ItemFormDTO;
 import org.mbc.board.entity.Item;
 import org.mbc.board.entity.ItemImg;
-import org.mbc.board.repository.ItemImgRepository;
 import org.mbc.board.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

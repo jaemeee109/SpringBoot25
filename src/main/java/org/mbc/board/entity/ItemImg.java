@@ -1,13 +1,15 @@
 package org.mbc.board.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.mbc.board.domain.BaseEntity;
 
 @Entity
 @Table(name="item_img")
 @Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemImg extends BaseEntity {
 
     @Id

@@ -1,12 +1,14 @@
 package org.mbc.board.repository;
 
 import org.mbc.board.entity.Item;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
 
@@ -29,7 +31,12 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
     List<Item> findByItemDetailNative(@Param("itemDetail") String itemDetail);
 
 
+    @EntityGraph(attributePaths = {"imageSet"})
+    @Query("select i from Item i join fetch i.imageSet where i.mid = :mid")
+    Optional<Item> findByIdWithImage(Long mid);
 
+    @Query("SELECT i FROM Item i JOIN i.imageSet img WHERE img.mid = :imgId")
+    Optional<Item> findByItemImgId(@Param("imgId") Long imgId);
 
 
 

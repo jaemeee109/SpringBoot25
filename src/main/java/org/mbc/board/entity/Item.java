@@ -6,9 +6,12 @@ import lombok.Setter;
 import lombok.ToString;
 import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.domain.BaseEntity;
+import org.mbc.board.domain.BoardImage;
 import org.mbc.board.dto.ItemFormDTO;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="item")
@@ -49,5 +52,7 @@ public class Item extends BaseEntity {
        this.itemSellStatus = itemFormDTO.getItemSellStatus();
    }//updateItem 종료
 
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemImg> imageSet = new ArrayList<>();
 
 } // class종료

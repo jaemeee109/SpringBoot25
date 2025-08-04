@@ -1,9 +1,8 @@
 package org.mbc.board.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
+import org.mbc.board.entity.Item;
 
 import java.io.Serializable;
 
@@ -13,6 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "board") // board테이블 제외
+@Table
 public class BoardImage implements Comparable<BoardImage>{
     //                             @OneToMany처리에 순번에 맞게 정렬하기 위함
     // changeBoard()를 이용해서 Board객체를 나중에 지정할 수 있게
@@ -25,6 +25,10 @@ public class BoardImage implements Comparable<BoardImage>{
 
     @ManyToOne  // fk로 선언 됨!!! p612
     private Board board ; // 연습용으로 @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;
 
     @Override // 재정의
     public int compareTo(BoardImage other) {
