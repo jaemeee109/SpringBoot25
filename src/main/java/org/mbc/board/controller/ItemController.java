@@ -24,18 +24,18 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 @Log4j2
-@RequestMapping("/admin/item")
+@RequestMapping
 public class ItemController {
 
     private final ItemService itemService;
 
-    @GetMapping("/new")
+    @GetMapping("/admin/item/new")
     public String itemForm(Model model) {
         model.addAttribute("itemFormDTO", new ItemFormDTO());
         return "item/itemForm";
     }
 
-    @PostMapping("/new")
+    @PostMapping("/admin/item/new")
     public String itemNew(@Valid ItemFormDTO itemFormDTO,
                           BindingResult bindingResult,
                           Model model,
@@ -64,20 +64,23 @@ public class ItemController {
         return "redirect:/";
     }
 
-    @GetMapping("/{mid}")
-    public String itemDtl(@PathVariable("mid") Long mid, Model model) {
-        try {
-            ItemFormDTO itemFormDTO = itemService.getItemDtl(mid);
-            model.addAttribute("itemFormDTO", itemFormDTO);
-        } catch (EntityActionVetoException e) {
-            model.addAttribute("errorMessage", "존재하지 않는 상품입니다");
-            model.addAttribute("itemFormDTO", new ItemFormDTO());
-            return "item/itemForm";
-        }
-        return "item/itemForm";
+    @GetMapping("/item/{mid}")
+    public String itemDtl(Model model ,@PathVariable("mid") Long mid) {
+
+         ItemFormDTO itemFormDTO = itemService.getItemDtl(mid);
+            model.addAttribute("item", itemFormDTO);
+
+        return "item/itemDtl";
     }
 
-    @PostMapping("/{mid}")
+    @GetMapping("/admin/item/{mid}")
+    public String itemUpdate(@PathVariable("mid") Long mid, Model model) {
+        ItemFormDTO itemFormDTO = itemService.getItemDtl(mid);
+        model.addAttribute("itemFormDTO", itemFormDTO);
+        return "item/itemForm"; // 수정 화면 재사용
+    }
+
+    @PostMapping("/admin/item/{mid}")
     public String itemUpdate(@Valid ItemFormDTO itemFormDTO,
                              BindingResult bindingResult,
                              @RequestParam(value = "files", required = false) List<MultipartFile> files,@RequestParam(value = "deleteImgIds", required = false) List<Long> deleteImgIds,
@@ -98,7 +101,7 @@ public class ItemController {
 
             if (deleteImgIds != null && deleteImgIds.isEmpty()) {
                 for(Long imgId : deleteImgIds) {
-                    itemService.getItemDtl(imgId);
+                    itemService.deleteItemImage(imgId);
                 }// for종료
             }//if종료
 
@@ -113,7 +116,7 @@ public class ItemController {
         return "redirect:/";
     }
 
-    @GetMapping("/{page}")
+    @GetMapping(value={"/admin/items","/admin/items/{page}"})
     public String itemManage(ItemSearchDTO itemSearchDTO,
                              @PathVariable("page") Optional<Integer> page,
                              Model model) {
@@ -127,4 +130,6 @@ public class ItemController {
 
         return "item/itemMng";
     } //itemManage 종료
+
+
 } // class종료

@@ -6,8 +6,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.dto.ItemSearchDTO;
+import org.mbc.board.dto.MainItemDTO;
+import org.mbc.board.dto.QMainItemDTO;
 import org.mbc.board.entity.Item;
 import org.mbc.board.entity.QItem;
+import org.mbc.board.entity.QItemImg;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +18,7 @@ import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
@@ -77,4 +81,41 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
 
     }
+
+    @Override
+    public Page<MainItemDTO> getMainItemDTOPage(ItemSearchDTO itemSearchDTO, Pageable pageable) {
+        QItem item = QItem.item;
+        QItemImg itemImg = QItemImg.itemImg;
+
+        QueryResults<MainItemDTO> results = queryFactory.select(
+                        new QMainItemDTO(
+                                item.mid,
+                                item.itemNm,
+                                item.itemDetail,
+                                itemImg.imgUrl,
+                                item.price)
+                )
+                .from(itemImg)
+                .join(itemImg.item, item)
+                .where(itemImg.repimgYn.eq("Y"))
+                .where(itemNmLike(itemSearchDTO.getSearchQuery()))
+                .orderBy(item.mid.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        List<MainItemDTO> content = results.getResults();
+        long total = results.getTotal();
+        return new PageImpl<>(content, pageable, total);
+
+
+
+    }//getMainItemDTOPage 종료
+
+
+
+    private BooleanExpression itemNmLike(String searchQuery){
+        return StringUtils.isEmpty(searchQuery)? null : QItem.item.itemNm.like("%"+searchQuery+"%");
+    }//itemNmLike 종료
+
 } //class종료

@@ -116,9 +116,11 @@ public class CustomSecurityConfig {
         });
 
 
-     http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll()
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin/item/**").hasRole("ADMIN") // 상품 수정 등록
+                .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자페이지
+                .requestMatchers("/item/**").permitAll() // 상세페이지
+                .anyRequest().permitAll() // 그외는 로그인
         );
 
         return http.build();

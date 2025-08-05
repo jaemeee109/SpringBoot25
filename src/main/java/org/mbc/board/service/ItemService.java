@@ -6,6 +6,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.mbc.board.dto.ItemFormDTO;
 import org.mbc.board.dto.ItemImgDTO;
 import org.mbc.board.dto.ItemSearchDTO;
+import org.mbc.board.dto.MainItemDTO;
 import org.mbc.board.dto.upload.UploadResultDTO;
 import org.mbc.board.entity.Item;
 import org.mbc.board.entity.ItemImg;
@@ -54,7 +55,7 @@ public class ItemService {
 
         itemRepository.save(item);
         return item.getMid();
-    }
+    }//saveItem()종료
 
 
 
@@ -81,7 +82,7 @@ public class ItemService {
         }
 
         return item.getMid();
-    }
+    }//updateItem()종료
 
     public List<UploadResultDTO> uploadFiles(List<MultipartFile> files) {
         List<UploadResultDTO> resultList = new ArrayList<>();
@@ -115,7 +116,7 @@ public class ItemService {
         }
 
         return resultList;
-    }
+    } //uploadFiles()종료
 
     @Transactional(readOnly = true)
     public ItemFormDTO getItemDtl(Long mid) {
@@ -140,17 +141,22 @@ public class ItemService {
         dto.setImgList(itemImgDTOList);
 
         return dto;
-    }
+    }//getItemDtl()종료
 
     public void deleteItemImage(Long imgId) {
         Item item = itemRepository.findByItemImgId(imgId)
                 .orElseThrow(() -> new EntityNotFoundException("이미지 삭제 대상 없음"));
 
         item.getImageSet().removeIf(img -> img.getMid().equals(imgId));
-    }
+    }//deleteItemImage()종료
 
     @Transactional
     public Page<Item> getAdminItemPage(ItemSearchDTO itemSearchDTO, Pageable pageable) {
         return itemRepository.getAdminItemPage(itemSearchDTO, pageable);
-    }
+    }//getAdminItemPage() 종료
+    
+    @Transactional(readOnly = true)
+    public Page<MainItemDTO> getMainItemDTOPage(ItemSearchDTO itemSearchDTO, Pageable pageable) {
+        return itemRepository.getMainItemDTOPage(itemSearchDTO, pageable);
+    }//getMainItemDTOPage()종료
 }
