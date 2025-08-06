@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface ItemImgRepository extends JpaRepository<ItemImg, Long> {
 
-    List<ItemImg> findByItem_MidOrderByMidAsc(Long mid);;
+    List<ItemImg> findByItem_MidOrderByMidAsc(Long mid);
+
+    ItemImg findByItemIdAndRepimgYn (Long mid, String repimgYn);
 
 }//interface 종료

@@ -28,8 +28,8 @@ public class Member extends BaseEntity {
     private String name; // 유저이름
     private String address; //주소
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+/*    @Enumerated(EnumType.STRING)
+    private Role role;*/
 
 
     private boolean social ; // 카톡,구글 로그인 기법 유무
@@ -77,7 +77,7 @@ public class Member extends BaseEntity {
                 .email(memberJoinDTO.getEmail())
                 .address(memberJoinDTO.getAddress())
                 .mpw(passwordEncoder.encode(memberJoinDTO.getMpw()))
-                .role(Role.ADMIN)
+                .social(false)
                 .build();
 
         member.addRole(MemberRole.ADMIN);

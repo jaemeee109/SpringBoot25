@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -110,9 +111,16 @@ public class CustomSecurityConfig {
         });
 
         // p718 403예외처리 핸들러 사용
-        http.exceptionHandling(httpSecurityExceptionHandlingConfigurer -> {
+   /*     http.exceptionHandling(httpSecurityExceptionHandlingConfigurer -> {
             httpSecurityExceptionHandlingConfigurer.accessDeniedHandler(accessDeniedHandler());
             // 하단에 메서드 추가
+        });*/
+
+
+        http.exceptionHandling(httpSecurityExceptionHandlingConfigurer -> {
+            httpSecurityExceptionHandlingConfigurer
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(accessDeniedHandler());
         });
 
 
@@ -120,6 +128,7 @@ public class CustomSecurityConfig {
                 .requestMatchers("/admin/item/**").hasRole("ADMIN") // 상품 수정 등록
                 .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자페이지
                 .requestMatchers("/item/**").permitAll() // 상세페이지
+                .requestMatchers("/order/**").authenticated()
                 .anyRequest().permitAll() // 그외는 로그인
         );
 

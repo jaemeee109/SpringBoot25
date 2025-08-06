@@ -8,6 +8,7 @@ import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.domain.BaseEntity;
 import org.mbc.board.domain.BoardImage;
 import org.mbc.board.dto.ItemFormDTO;
+import org.mbc.board.exception.OutOfStockException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,5 +55,15 @@ public class Item extends BaseEntity {
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemImg> imageSet = new ArrayList<>();
+   
 
+   public void removeStock(int stockNumber){
+    //상품 주문시 재고 감소
+       int restStock = this.stockNumber - stockNumber;
+       if(restStock < 0){
+           throw new OutOfStockException("상품의 재고가 부족합니다, (현재 재고 수량: "+this.stockNumber);
+       } // if종료
+       this.stockNumber = restStock;
+
+   } // removeStock 종료
 } // class종료

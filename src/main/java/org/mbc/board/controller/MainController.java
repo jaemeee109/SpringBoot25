@@ -17,13 +17,13 @@ import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/")
+@RequestMapping
 @Log4j2
 public class MainController {
 
     private final ItemService itemService;
 
-    @GetMapping("")
+    @GetMapping("/")
     public String main(ItemSearchDTO itemSearchDTO, Optional<Integer> page, Model model) {
 
         Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0,6);

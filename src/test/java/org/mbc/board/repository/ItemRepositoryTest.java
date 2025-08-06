@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.Rollback;
 import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.util.List;
 /*@TestPropertySource(locations = "classpath:application-test.properties") <- 오류남 */
 @SpringBootTest
 @Log4j2
+@Rollback
 class ItemRepositoryTest {
 
     @Autowired
