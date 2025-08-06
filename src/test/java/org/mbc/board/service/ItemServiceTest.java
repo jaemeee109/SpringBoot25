@@ -4,8 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.dto.ItemFormDTO;
+import org.mbc.board.dto.upload.UploadResultDTO;
 import org.mbc.board.entity.Item;
 import org.mbc.board.entity.ItemImg;
+import org.mbc.board.repository.ItemImgRepository;
 import org.mbc.board.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,9 +58,12 @@ public class ItemServiceTest {
         itemFormDTO.setStockNumber(100);
 
         List<MultipartFile> multipartFileList = createMultipartFiles();
-        Long mid = itemService.saveItem(itemFormDTO, multipartFileList);
 
-        List<ItemImg> itemImgList = itemImgRepository.findByItem_MidOrderByMidAsc(mid);
+        // multipartFileList를 UploadResultDTO 리스트로 변환
+        List<UploadResultDTO> uploadResultDTOList = itemService.uploadFiles(multipartFileList);
+
+        Long mid = itemService.saveItem(itemFormDTO, uploadResultDTOList);
+
         Item item = itemRepository.findById(mid).orElseThrow(EntityNotFoundException::new);
 
         assertEquals(itemFormDTO.getItemNm(), item.getItemNm());
@@ -66,8 +71,7 @@ public class ItemServiceTest {
         assertEquals(itemFormDTO.getPrice(), item.getPrice());
         assertEquals(itemFormDTO.getStockNumber(), item.getStockNumber());
 
-// 원본 이미지 파일명 비교
-        assertEquals(multipartFileList.get(0).getOriginalFilename(), itemImgList.get(0).getOriImgName());
-
+        // 원본 이미지 파일명 비교
+        assertEquals(multipartFileList.get(0).getOriginalFilename(), uploadResultDTOList.get(0).getFileName());
     } //saveItem() 종료
 } // class종료
