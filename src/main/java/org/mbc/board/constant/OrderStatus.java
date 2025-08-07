@@ -1,5 +1,5 @@
 package org.mbc.board.constant;
 
 public enum OrderStatus {
-    ORDER, CANCLE
+    ORDER, CANCEL
 } // enum종료

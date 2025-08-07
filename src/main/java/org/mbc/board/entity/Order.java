@@ -28,6 +28,7 @@ public class Order extends BaseEntity {
     private LocalDateTime orderDate; // 주문일
 
     @Enumerated(EnumType.STRING)
+    @Column(length=50)
     private OrderStatus orderstatus; // 주문상태
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
@@ -59,5 +60,15 @@ public class Order extends BaseEntity {
         }//for종료
         return totalPrice;
     } // getTotalPrice()종료
+
+
+    public void cancelOrder(){
+
+        this.orderstatus = OrderStatus.CANCEL;
+        for(OrderItem orderItem : orderItems){
+            orderItem.cancel();
+        }//for종료
+
+    }//cancelOrder()종료
 
 } //class 종료

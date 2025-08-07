@@ -76,6 +76,20 @@ public class OrderController {
         return "order/orderHist";
     }
     // orderHist()종료
+
+
+    @PostMapping("/order/{mid}/cancel")
+    public @ResponseBody ResponseEntity orderCancel(@PathVariable("mid") Long mid, Principal principal, Model model) {
+        
+        //다른사람 주문을 취소하지 못하게 방지
+        if(!orderService.validateOrder(mid, principal.getName())){
+            return new ResponseEntity<String>("주문 취소 권한이 없습니다", HttpStatus.FORBIDDEN);
+        }//if종료
+        orderService.cancelOrder(mid);
+        // 주문 취소 로직 호출
+        return new ResponseEntity<Long>(mid, HttpStatus.OK);
+        
+    } // orderCancel() 종료
     
     
 } // class 종료

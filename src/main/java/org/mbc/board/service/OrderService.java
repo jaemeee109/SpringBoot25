@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +36,11 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ItemImgRepository itemImgRepository;
 
-    public Long order(OrderDTO orderDTO, String email) {
+    public Long order(OrderDTO orderDTO, String mid) {
 
         Item item = itemRepository.findById(orderDTO.getMid()).orElseThrow(EntityNotFoundException::new);
         // 주문할 상품 조회 (없으면 예외발생)
-        Member member = memberRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("회원이 존재하지 않습니다"));
+        Member member = memberRepository.findByMid(mid).orElseThrow(()->new EntityNotFoundException("회원이 존재하지 않습니다"));
         // 이메일로 정보 조회, 이메일 없으면 예외발생
         List<OrderItem> orderItemList = new ArrayList<>();
         // 주문 상품 리스트에 담기
@@ -87,7 +88,29 @@ public class OrderService {
         }
 
         return new PageImpl<>(orderHistDTOs, pageable, totalCount);
-    }
+    } //getOrderList() 종룐
+
+
+    @Transactional(readOnly = true)
+    public boolean validateOrder(Long orderId, String userMid) {
+        // 로그인한 사용자가 주문한 사용자와 같은 사용자인지 검사
+
+        Member curMember = memberRepository.findByMid(userMid).orElseThrow(()-> new EntityNotFoundException("회원이 존재하지 않습니다."));
+        Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+
+        Member saveMember = order.getMember();
+
+        return saveMember != null && saveMember.getMid().equals(curMember.getMid());
+
+
+
+}// validateOrder() 종료
+
+    public void cancelOrder(Long orderId){
+
+        Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        order.cancelOrder();
+    }//cancelOrder()종료
 
 
 
