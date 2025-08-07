@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.mbc.board.domain.Member;
+import org.mbc.board.dto.CartDetailDTO;
 import org.mbc.board.dto.CartItemDTO;
 import org.mbc.board.entity.Cart;
 import org.mbc.board.entity.CartItem;
@@ -14,6 +15,9 @@ import org.mbc.board.repository.ItemRepository;
 import org.mbc.board.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +41,8 @@ public class CartService {
             cartRepository.save(cart);
         }//if종료
 
-        CartItem savedCartItem = cartItemRepository.findByCartIdAndItemId(cart.getMid(), item.getMid());
-        
+        CartItem savedCartItem = cartItemRepository.findByCartAndItem(cart, item);
+
         if(savedCartItem != null) {
             savedCartItem.addCount(cartItemDTO.getCount());
             return savedCartItem.getMid();
@@ -51,6 +55,18 @@ public class CartService {
 
 
     }//addCart()종료
-    
+
+  @Transactional(readOnly = true)
+    public List<CartDetailDTO> getCartList(String mid) {
+
+        List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
+        Member member = memberRepository.findById(mid).orElseThrow(EntityNotFoundException::new);
+        Cart cart = cartRepository.findByMember(member);
+        if(cart != null) {
+            return cartDetailDTOList;
+        }//if종료
+        cartDetailDTOList = cartItemRepository.findCartDetailDTOList(cart.getMid());
+        return cartDetailDTOList;
+    }//getCartList() 종료
     
 } // class종료
