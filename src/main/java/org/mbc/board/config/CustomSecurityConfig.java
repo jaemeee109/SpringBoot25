@@ -130,6 +130,7 @@ public class CustomSecurityConfig {
                 .requestMatchers("/item/**").permitAll() // 상세페이지
                 .requestMatchers("/order/**").authenticated()
                 .requestMatchers("/orders/**").authenticated()
+                .requestMatchers("/cart/**").authenticated()
                 .anyRequest().permitAll() // 그외는 로그인
         );
 
