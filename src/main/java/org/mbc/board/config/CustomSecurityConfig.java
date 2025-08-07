@@ -153,13 +153,14 @@ public class CustomSecurityConfig {
     // p683 정적페이지에 시큐리티 제외 처리
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        // /css와 같이 정적 자원들에 대한 시큐리티 적용 제외
         log.info("--- CustomSecurityConfig.WebSecurityCustomizer() 메서드 실행 ---------");
-        log.info("--- toStaticResources에 ignoring처리됨 ---");
         return (web) -> web.ignoring()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
-        // No security for GET /css/styles.css
-    }
+                .requestMatchers(
+                        PathRequest.toStaticResources().atCommonLocations(),
+                        new AntPathRequestMatcher("/upload/**")
+                );
+    }// No security for GET /css/styles.css
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
