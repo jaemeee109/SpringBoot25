@@ -20,5 +20,6 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @EntityGraph(attributePaths = "roleSet") // 연관된 롤을 가져옴 (USER,ADMIN)
     Optional<Member> findByEmail(String email);
 
+    Optional<Member> findByMid(String mid);
 
 }

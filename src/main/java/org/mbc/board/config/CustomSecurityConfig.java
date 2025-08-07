@@ -129,6 +129,7 @@ public class CustomSecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자페이지
                 .requestMatchers("/item/**").permitAll() // 상세페이지
                 .requestMatchers("/order/**").authenticated()
+                .requestMatchers("/orders/**").authenticated()
                 .anyRequest().permitAll() // 그외는 로그인
         );
 

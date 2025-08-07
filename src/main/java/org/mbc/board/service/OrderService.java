@@ -58,30 +58,37 @@ public class OrderService {
     } //order()종료
 
     @Transactional(readOnly = true)
-    public Page<OrderHistDTO> getOrderList(String email, Pageable pageable) {
+    public Page<OrderHistDTO> getOrderList(String mid, Pageable pageable) {
+        // mid로 회원 조회
+        Member member = memberRepository.findByMid(mid)
+                .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
 
-        List<Order> orders = orderRepository.findOrders(email, pageable);
-        Long totalCount = orderRepository.countOrder(email);
+        // mid 중복 안 생기게 변수명 바꿈
+        String memberMid = member.getMid();
 
+        // 주문 조회
+        Page<Order> orderPage = orderRepository.findOrders(memberMid, pageable);
+        List<Order> orders = orderPage.getContent();
+        long totalCount = orderPage.getTotalElements();
+
+        // DTO 변환
         List<OrderHistDTO> orderHistDTOs = new ArrayList<>();
 
         for (Order order : orders) {
             OrderHistDTO orderHistDTO = new OrderHistDTO(order);
-            List<OrderItem> orderItems = order.getOrderItems();
 
-            for(OrderItem orderItem : orderItems) {
-                ItemImg itemImg = itemImgRepository.findByItemIdAndRepimgYn(orderItem.getItem().getMid(),"Y");
+            for (OrderItem orderItem : order.getOrderItems()) {
+                ItemImg itemImg = itemImgRepository.findByItem_MidAndRepimgYn(orderItem.getItem().getMid(), "Y");
                 OrderItemDTO orderItemDTO = new OrderItemDTO(orderItem, itemImg.getImgUrl());
                 orderHistDTO.addOrderItemDTO(orderItemDTO);
-            } //for종료
-            orderHistDTOs.add(orderHistDTO);
+            }
 
-        }//for종료
+            orderHistDTOs.add(orderHistDTO);
+        }
 
         return new PageImpl<>(orderHistDTOs, pageable, totalCount);
+    }
 
 
 
-    } //getOrderList()종료
-    
 }//class종료

@@ -36,7 +36,6 @@ public class OrderController {
     private final OrderService orderService;
     
     @PostMapping("/order")
-    @PreAuthorize("isAuthenticated()")
     public @ResponseBody ResponseEntity order (@RequestBody @Valid OrderDTO orderDTO, BindingResult bindingResult, Principal principal) {
         
         if(bindingResult.hasErrors()) {
@@ -61,19 +60,22 @@ public class OrderController {
         }//try-catch 종료
         return new ResponseEntity<Long>(mid, HttpStatus.OK);
     } //order() 종료
-    
-    
-    @GetMapping(value ={"order","/orders/{page}"})
-    public String orderHist(@PathVariable("page")Optional<Integer> page, Principal principal, Model model) {
 
-        Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0,4);
-        //                                                               한번에 가지고 올 주문개수
-        Page<OrderHistDTO> orderHistDTOList = orderService.getOrderList(principal.getName(), pageable);
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping(value ={"orders","/orders/{page}"})
+    public String orderHist(@PathVariable("page")Optional<Integer> page, Authentication authentication, Model model) {
+        Pageable pageable = PageRequest.of(page.orElse(0), 4);
+
+        MemberSecurityDTO member = (MemberSecurityDTO) authentication.getPrincipal();
+        String mid = member.getMid();  // 이메일이 아닌 mid를 기준으로 조회!
+
+        Page<OrderHistDTO> orderHistDTOList = orderService.getOrderList(mid, pageable);
         model.addAttribute("orders", orderHistDTOList);
         model.addAttribute("page", pageable.getPageNumber());
-        model.addAttribute("maxPage",5);
+        model.addAttribute("maxPage", 5);
         return "order/orderHist";
-    } // orderHist()종료
+    }
+    // orderHist()종료
     
     
 } // class 종료
