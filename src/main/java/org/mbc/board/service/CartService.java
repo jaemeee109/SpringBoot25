@@ -59,14 +59,14 @@ public class CartService {
   @Transactional(readOnly = true)
     public List<CartDetailDTO> getCartList(String mid) {
 
-        List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
+       /* List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();*/
         Member member = memberRepository.findById(mid).orElseThrow(EntityNotFoundException::new);
         Cart cart = cartRepository.findByMember(member);
-        if(cart != null) {
-            return cartDetailDTOList;
+        if(cart == null) {
+            return new ArrayList<>();
         }//if종료
-        cartDetailDTOList = cartItemRepository.findCartDetailDTOList(cart.getMid());
-        return cartDetailDTOList;
+         return cartItemRepository.findCartDetailDTOList(cart.getMid());
+
     }//getCartList() 종료
     
 } // class종료
