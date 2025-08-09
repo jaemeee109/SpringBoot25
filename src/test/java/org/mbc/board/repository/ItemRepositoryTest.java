@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.constant.ItemSellStatus;
 import org.mbc.board.entity.Item;
+import org.mbc.board.entity.ItemImg;
 import org.mbc.board.entity.QItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,8 @@ class ItemRepositoryTest {
 
     @Autowired
     ItemRepository itemRepository;
+    @Autowired
+    private ItemImgRepository itemImgRepository;
 
     @Test
     @DisplayName("===== 상품 저장 테스트=====")
@@ -201,5 +204,28 @@ class ItemRepositoryTest {
             log.info(resultItem.toString());
         }// for종료
     }//queryDslTest() 종료
+
+
+
+
+    @Test
+    public void insertTestItemImg() {
+        // 상품 찾기
+        Item item = itemRepository.findById(305L)
+                .orElseThrow(() -> new RuntimeException("상품이 존재하지 않습니다."));
+
+        // 이미지 객체 생성
+        ItemImg itemImg = ItemImg.builder()
+                .imgName("1b2fe692-291c-408e-94fc-9acdefa4dd2c_02.JPG")
+                .oriImgName("test.jpg")
+                .imgUrl("/upload/1b2fe692-291c-408e-94fc-9acdefa4dd2c_02.JPG")
+                .repimgYn("Y")
+                .item(item)
+                .build();
+
+        // 저장
+        itemImgRepository.save(itemImg);
+    }
+
 
 } //class종료

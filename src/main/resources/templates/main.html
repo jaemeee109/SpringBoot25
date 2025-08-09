@@ -28,18 +28,23 @@
         .center{
             text-align:center;
         }
+        /* 추가: 카드 이미지 크기 고정 및 비율 유지 */
+        .card-img-top {
+            width: 300px;
+            height: 400px;         /* 고정 높이 */
+            object-fit: cover;     /* 비율 유지하며 잘림 발생 가능 */
+            object-position: center center; /* 중앙 기준으로 잘림 */
+        }
+        /*     !* content 최상단 margin 추가 *!
+             .content-top {
+                 margin-top: 50px; !* navbar와 간격 띄우기 *!
+             }*/
     </style>
 </th:block>
 
-<div layout:fragment="content">
+<div layout:fragment="content" class="content-top">
 
-    <div id="carouselControls" class="carousel slide margin" data-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active item">
-                <img class="d-block w-100 banner" src="https://user-images.githubusercontent.com/13268420/112147492-1ab76200-8c20-11eb-8649-3d2f282c3c02.png" alt="First slide">
-            </div>
-        </div>
-    </div>
+
 
     <input type="hidden" name="searchQuery" th:value="${itemSearchDTO.searchQuery}">
     <div th:if="${not #strings.isEmpty(itemSearchDTO.searchQuery)}" class="center">
@@ -51,7 +56,8 @@
             <div class="col-md-4 margin">
                 <div class="card">
                     <a th:href="'/item/' +${item.mid}" class="text-dark">
-                        <img th:src="${item.imgUrl}" class="card-img-top" th:alt="${item.itemNm}" height="400">
+                        <!-- height 속성 제거 -->
+                        <img th:src="${item.imgUrl}" class="card-img-top" th:alt="${item.itemNm}">
                         <div class="card-body">
                             <h4 class="card-title">[[${item.itemNm}]]</h4>
                             <p class="card-text">[[${item.itemDetail}]]</p>
