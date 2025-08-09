@@ -24,6 +24,7 @@ import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -111,6 +112,24 @@ public class OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
         order.cancelOrder();
     }//cancelOrder()종료
+
+
+    public Long orders (List<OrderDTO> orderDTOList, String mid) {
+
+        Optional<Member> member = memberRepository.findByMid(mid);
+        List<OrderItem> orderItemList = new ArrayList<>();
+
+        for(OrderDTO orderDTO : orderDTOList){
+            Item item = itemRepository.findById(orderDTO.getMid()).orElseThrow(EntityNotFoundException::new);
+            OrderItem orderItem = OrderItem.createOrderItem(item, orderDTO.getCount());
+            orderItemList.add(orderItem);
+        } // for종료
+
+        Order order = Order.createOrder(member.get(), orderItemList);
+        orderRepository.save(order);
+        return order.getMid();
+
+    }//orders()종료
 
 
 
